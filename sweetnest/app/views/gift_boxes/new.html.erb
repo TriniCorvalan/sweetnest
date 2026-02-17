@@ -1,0 +1,37 @@
+<%= render "shared/header" %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" data-controller="wizard candy-selector cart order">
+  <div class="mb-12">
+    <div class="w-full bg-white/20 backdrop-blur-sm rounded-3xl p-1 shadow-glow">
+      <div class="flex justify-between text-white text-sm mb-2 px-4">
+        <span>Step <span id="currentStep">1</span> of 4</span>
+        <span id="stepLabel">Select Levels</span>
+      </div>
+      <div class="w-full bg-white/10 rounded-2xl h-2">
+        <div id="progressFill" class="bg-gradient-to-r from-white to-yellow-200 h-2 rounded-xl progress-fill" style="width: 25%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-12 items-start">
+    <div class="lg:sticky lg:top-24 lg:h-[70vh] order-2 lg:order-1" data-controller="three-preview">
+      <div class="glass-effect rounded-3xl p-6 shadow-glow h-full">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Live Preview</h2>
+          <div class="text-sm text-white/80">Rotate to view</div>
+        </div>
+        <div id="threeCanvas" class="w-full h-96 bg-gradient-to-b from-purple-900/50 to-pink-900/50 rounded-2xl overflow-hidden"></div>
+      </div>
+    </div>
+
+    <div class="order-1 lg:order-2 space-y-8" id="mainContent">
+      <%= render "shared/step1_levels" %>
+      <%= render "shared/step2_candies" %>
+      <%= render "shared/step3_cart" %>
+      <%= render "shared/step4_shipping" %>
+    </div>
+  </div>
+</div>
+
+<%= render "shared/success_modal" %>
+

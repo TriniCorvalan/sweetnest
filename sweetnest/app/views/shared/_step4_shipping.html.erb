@@ -1,0 +1,47 @@
+<div id="step4" class="hidden" data-sweetnest-step="4">
+  <div class="space-y-6">
+    <div class="glass-effect rounded-3xl p-8 shadow-glow">
+      <h2 class="text-3xl font-bold mb-6 bg-gradient-to-r from-white to-yellow-200 bg-clip-text text-transparent">📦 Delivery Details</h2>
+
+      <form id="shippingForm" class="space-y-4">
+        <div>
+          <label class="block text-white mb-2 font-medium" for="shipping_full_name">Full Name</label>
+          <input id="shipping_full_name" type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="John Doe">
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white mb-2 font-medium" for="shipping_street">Street Address</label>
+            <input id="shipping_street" type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="123 Sweet Street">
+          </div>
+          <div>
+            <label class="block text-white mb-2 font-medium" for="shipping_unit">Apt/Unit (Optional)</label>
+            <input id="shipping_unit" type="text" class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="Apt 4B">
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white mb-2 font-medium" for="shipping_city">City</label>
+            <input id="shipping_city" type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="Candyville">
+          </div>
+          <div>
+            <label class="block text-white mb-2 font-medium" for="shipping_zip">ZIP Code</label>
+            <input id="shipping_zip" type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="12345">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-white mb-2 font-medium" for="shipping_special_instructions">Special Instructions</label>
+          <textarea id="shipping_special_instructions" class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" rows="3" placeholder="Hide in backyard treehouse..."></textarea>
+        </div>
+      </form>
+    </div>
+
+    <div class="flex gap-4 pt-4">
+      <button id="backToCart" class="flex-1 bg-white/20 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium hover:bg-white/30 transition-all btn-glow">← Back to Cart</button>
+      <button id="placeOrder" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 px-6 rounded-2xl font-bold text-xl shadow-glow hover:shadow-2xl btn-glow">Place Order - Secure Checkout →</button>
+    </div>
+  </div>
+</div>
+
