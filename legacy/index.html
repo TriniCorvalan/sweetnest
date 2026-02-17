@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nested Candy Box Creator - SweetNest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Poppins', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-effect { backdrop-filter: blur(20px); background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .shadow-glow { box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 0 20px rgba(102, 126, 234, 0.2); }
+        .candy-bounce { animation: bounce 0.6s ease infinite alternate; }
+        @keyframes bounce { from { transform: translateY(0px); } to { transform: translateY(-10px); } }
+        .level-enter-active { animation: slideInUp 0.5s ease-out; }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .progress-fill { transition: width 0.4s ease; }
+        .btn-glow { transition: all 0.3s ease; }
+        .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-400 via-pink-500 to-orange-400 min-h-screen overflow-x-hidden">
+    <!-- Header -->
+    <header class="gradient-bg shadow-2xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shadow-glow">
+                        <span class="text-2xl">🍭</span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-white">SweetNest</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="cartIndicator" class="hidden bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm font-medium flex items-center space-x-1">
+                        <span>🛒</span>
+                        <span id="cartCount">0</span>
+                    </div>
+                    <div class="text-white/80 text-sm">Total: $<span id="totalPrice">0</span></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Progress Bar -->
+        <div class="mb-12">
+            <div class="w-full bg-white/20 backdrop-blur-sm rounded-3xl p-1 shadow-glow">
+                <div class="flex justify-between text-white text-sm mb-2 px-4">
+                    <span>Step <span id="currentStep">1</span> of 4</span>
+                    <span id="stepLabel">Select Levels</span>
+                </div>
+                <div class="w-full bg-white/10 rounded-2xl h-2">
+                    <div id="progressFill" class="bg-gradient-to-r from-white to-yellow-200 h-2 rounded-xl progress-fill" style="width: 25%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid lg:grid-cols-2 gap-12 items-start">
+            <!-- 3D Preview -->
+            <div class="lg:sticky lg:top-24 lg:h-[70vh] order-2 lg:order-1">
+                <div class="glass-effect rounded-3xl p-6 shadow-glow h-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Live Preview</h2>
+                        <div class="text-sm text-white/80">Rotate to view</div>
+                    </div>
+                    <div id="threeCanvas" class="w-full h-96 bg-gradient-to-b from-purple-900/50 to-pink-900/50 rounded-2xl overflow-hidden"></div>
+                </div>
+            </div>
+
+            <!-- Configuration Form -->
+            <div class="order-1 lg:order-2 space-y-8" id="mainContent">
+                <!-- Step 1: Number of Levels -->
+                <div id="step1" class="step-active">
+                    <div class="glass-effect rounded-3xl p-8 shadow-glow level-enter-active">
+                        <h2 class="text-3xl font-bold mb-6 bg-gradient-to-r from-white to-yellow-200 bg-clip-text">🎁 Create Your Nested Gift Box</h2>
+                        <p class="text-white/80 mb-8 text-lg">Choose how many magical layers of sweetness you want to surprise them with.</p>
+
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="level-option glass-effect p-6 rounded-2xl cursor-pointer hover:scale-105 transition-all duration-300 border-2 border-white/20 hover:border-white/50" data-levels="1">
+                                <div class="text-4xl mb-4">🍭</div>
+                                <h3 class="font-bold text-xl mb-2 text-white">Single Layer</h3>
+                                <p class="text-white/70">Perfect for a sweet surprise</p>
+                            </div>
+                            <div class="level-option glass-effect p-6 rounded-2xl cursor-pointer hover:scale-105 transition-all duration-300 border-2 border-white/20 hover:border-white/50" data-levels="2">
+                                <div class="text-4xl mb-4">🍬🍭</div>
+                                <h3 class="font-bold text-xl mb-2 text-white">Double Delight</h3>
+                                <p class="text-white/70">Double the joy, double the wow!</p>
+                            </div>
+                            <div class="level-option glass-effect p-6 rounded-2xl cursor-pointer hover:scale-105 transition-all duration-300 border-2 border-white/20 hover:border-white/50" data-levels="3">
+                                <div class="text-4xl mb-4 flex flex-col space-y-1">🍬<br>🍭<br>🍫</div>
+                                <h3 class="font-bold text-xl mb-2 text-white">Triple Treasure</h3>
+                                <p class="text-white/70">Ultimate nested experience</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Candy Selection -->
+                <div id="step2" class="step-hidden">
+                    <div class="space-y-6">
+                        <div class="glass-effect rounded-3xl p-8 shadow-glow">
+                            <h2 class="text-3xl font-bold mb-6 bg-gradient-to-r from-white to-yellow-200 bg-clip-text">🍬 Customize Each Level</h2>
+                            <div id="levelSelector"></div>
+                        </div>
+                        <div class="flex gap-4 pt-4">
+                            <button id="backToLevels" class="flex-1 bg-white/20 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium hover:bg-white/30 transition-all btn-glow">← Back</button>
+                            <button id="nextToCart" class="flex-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 py-4 px-6 rounded-2xl font-bold text-lg shadow-glow hover:shadow-2xl btn-glow">Next: Review Cart →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Cart Review -->
+                <div id="step3" class="step-hidden">
+                    <div class="glass-effect rounded-3xl p-8 shadow-glow">
+                        <h2 class="text-3xl font-bold mb-8 bg-gradient-to-r from-white to-yellow-200 bg-clip-text">🛒 Review Your Sweet Creation</h2>
+                        <div id="cartSummary" class="space-y-4 mb-8"></div>
+                        <div class="text-3xl font-bold text-white text-center mb-8">
+                            Total: $<span id="finalTotal">0</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <button id="backToCandy" class="flex-1 bg-white/20 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium hover:bg-white/30 transition-all btn-glow">← Edit Candies</button>
+                            <button id="nextToShipping" class="flex-1 bg-gradient-to-r from-emerald-400 to-teal-500 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-glow hover:shadow-2xl btn-glow">Continue to Shipping →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Shipping & Payment -->
+                <div id="step4" class="step-hidden">
+                    <div class="space-y-6">
+                        <div class="glass-effect rounded-3xl p-8 shadow-glow">
+                            <h2 class="text-3xl font-bold mb-6 bg-gradient-to-r from-white to-yellow-200 bg-clip-text">📦 Delivery Details</h2>
+                            <form id="shippingForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-white mb-2 font-medium">Full Name</label>
+                                    <input type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="John Doe">
+                                </div>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-white mb-2 font-medium">Street Address</label>
+                                        <input type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="123 Sweet Street">
+                                    </div>
+                                    <div>
+                                        <label class="block text-white mb-2 font-medium">Apt/Unit (Optional)</label>
+                                        <input type="text" class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="Apt 4B">
+                                    </div>
+                                </div>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-white mb-2 font-medium">City</label>
+                                        <input type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="Candyville">
+                                    </div>
+                                    <div>
+                                        <label class="block text-white mb-2 font-medium">ZIP Code</label>
+                                        <input type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="12345">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-white mb-2 font-medium">Special Instructions</label>
+                                    <textarea class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" rows="3" placeholder="Hide in backyard treehouse..."></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="flex gap-4 pt-4">
+                            <button id="backToCart" class="flex-1 bg-white/20 backdrop-blur-sm text-white py-4 px-6 rounded-2xl font-medium hover:bg-white/30 transition-all btn-glow">← Back to Cart</button>
+                            <button id="placeOrder" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 px-6 rounded-2xl font-bold text-xl shadow-glow hover:shadow-2xl btn-glow">Place Order - Secure Checkout →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-effect rounded-3xl p-12 max-w-md w-full shadow-2xl text-center transform scale-95 animate-pulse">
+            <div class="text-8xl mb-6">🎉</div>
+            <h2 class="text-3xl font-bold text-white mb-4">Order Confirmed!</h2>
+            <p class="text-white/90 mb-8 text-lg">Your nested candy box is being prepared with love. Expect delivery within 3-5 days!</p>
+            <p class="text-yellow-300 font-bold text-xl mb-8">Order #<span id="orderNumber"></span></p>
+            <button id="completeOrder" class="w-full bg-gradient-to-r from-emerald-400 to-teal-500 text-white py-4 px-8 rounded-2xl font-bold text-lg shadow-glow hover:shadow-2xl btn-glow">Start New Order</button>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let appState = {
+            levels: 0,
+            currentLevel: 0,
+            boxConfig: {},
+            cart: [],
+            total: 0,
+            currentStep: 1
+        };
+
+        // Candy Data (Rails would load this from database)
+        const candies = {
+            small: [
+                { id: 1, name: 'Gummy Bears', price: 2.99, emoji: '🍬', color: '#ff6b9d', size: 0.3 },
+                { id: 2, name: 'Chocolate Kisses', price: 3.49, emoji: '🍫', color: '#8b4513', size: 0.25 },
+                { id: 3, name: 'Jelly Beans', price: 2.79, emoji: '🍬', color: '#ff9f43', size: 0.35 }
+            ],
+            medium: [
+                { id: 4, name: 'Lollipop', price: 1.99, emoji: '🍭', color: '#ff6b9d', size: 0.6 },
+                { id: 5, name: 'Caramel Chew', price: 2.49, emoji: '🍮', color: '#f4a261', size: 0.55 },
+                { id: 6, name: 'Peanut Butter Cup', price: 3.29, emoji: '🥜', color: '#d00000', size: 0.65 }
+            ],
+            large: [
+                { id: 7, name: 'Candy Bar', price: 4.99, emoji: '🍫', color: '#2d1b69', size: 1.0 },
+                { id: 8, name: 'Gourmet Truffle', price: 5.99, emoji: '🍫', color: '#8338ec', size: 0.9 },
+                { id: 9, name: 'Fruit Drop', price: 4.49, emoji: '🍬', color: '#06d6a0', size: 0.95 }
+            ]
+        };
+
+        // Three.js Scene Setup
+        let scene, camera, renderer, controls;
+        function initThreeJS() {
+            const canvas = document.getElementById('threeCanvas');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a0b2e);
+
+            camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            canvas.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 1.0;
+
+            camera.position.z = 5;
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Update 3D Preview
+        function updatePreview() {
+            // Clear existing meshes
+            while(scene.children.length > 2) {
+                scene.remove(scene.children[2]);
+            }
+
+            if (appState.levels === 0) return;
+
+            let cumulativeSize = 0;
+            for (let i = 0; i < appState.levels; i++) {
+                const levelSize = 2 - (i * 0.6);
+                const boxGeometry = new THREE.BoxGeometry(levelSize, levelSize, levelSize);
+                const boxMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.3 + (i * 0.2),
+                    shininess: 100
+                });
+                const box = new THREE.Mesh(boxGeometry, boxMaterial);
+                box.position.y = cumulativeSize;
+                box.castShadow = true;
+                box.receiveShadow = true;
+                scene.add(box);
+
+                // Add candy decoration
+                if (appState.boxConfig[i]) {
+                    appState.boxConfig[i].forEach((wallCandies, wallIndex) => {
+                        wallCandies.slice(0, 3).forEach((candy, candyIndex) => {
+                            const candyGeometry = new THREE.SphereGeometry(candy.size * 0.1, 16, 16);
+                            const candyMaterial = new THREE.MeshPhongMaterial({
+                                color: candy.color,
+                                emissive: new THREE.Color(candy.color).multiplyScalar(0.2)
+                            });
+                            const candyMesh = new THREE.Mesh(candyGeometry, candyMaterial);
+                            const angle = (wallIndex * Math.PI * 0.5) + (candyIndex * 0.3);
+                            candyMesh.position.set(
+                                Math.cos(angle) * (levelSize * 0.4),
+                                cumulativeSize + 0.1,
+                                Math.sin(angle) * (levelSize * 0.4)
+                            );
+                            scene.add(candyMesh);
+                        });
+                    });
+                }
+
+                cumulativeSize += levelSize * 0.48;
+            }
+        }
+
+        // UI Functions
+        function showStep(step) {
+            document.querySelectorAll('.step-active, .step-hidden').forEach(el => {
+                el.classList.remove('step-active', 'step-hidden');
+                el.classList.add('step-hidden');
+            });
+            document.getElementById(`step${step}`).classList.remove('step-hidden');
+            document.getElementById(`step${step}`).classList.add('step-active');
+
+            appState.currentStep = step;
+            document.getElementById('currentStep').textContent = step;
+            document.getElementById('progressFill').style.width = `${step * 25}%`;
+
+            const labels = ['Select Levels', 'Choose Candies', 'Review Cart', 'Shipping'];
+            document.getElementById('stepLabel').textContent = labels[step - 1];
+
+            updatePreview();
+        }
+
+        function updateCartDisplay() {
+            const cartCount = appState.cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = cartCount;
+            document.getElementById('cartCount').parentElement.classList.toggle('hidden', cartCount === 0);
+            document.getElementById('totalPrice').textContent = appState.total.toFixed(2);
+        }
+
+        function generateLevelSelector() {
+            const container = document.getElementById('levelSelector');
+            container.innerHTML = '';
+
+            for (let i = 0; i < appState.levels; i++) {
+                const levelDiv = document.createElement('div');
+                levelDiv.className = 'glass-effect rounded-2xl p-6 mb-6 shadow-glow level-enter-active';
+                levelDiv.innerHTML = `
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center mr-3 text-lg font-black">${i+1}</div>
+                        Level ${i+1} (${['Small', 'Medium', 'Large'][i]} walls)
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3" data-level="${i}">
+                        ${Array(4).fill(0).map((_, wall) => `
+                            <div class="wall-selector p-4 rounded-xl bg-white/10 border-2 border-dashed border-white/30 hover:border-white/60 transition-all group">
+                                <div class="text-center mb-3">
+                                    <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-white/20 flex items-center justify-center text-xl">${['Front', 'Right', 'Back', 'Left'][wall]}📦</div>
+                                    <span class="text-white/70 text-sm block">${['Small', 'Medium', 'Large', 'Small'][wall]} Wall</span>
+                                </div>
+                                <div class="candy-grid" data-wall="${wall}">
+                                    ${candies[['small', 'medium', 'large'][Math.min(i, 2)]].map(candy => `
+                                        <div class="candy-option p-2 rounded-lg cursor-pointer hover:scale-110 transition-all candy-bounce group-hover:candy-bounce-none" data-candy-id="${candy.id}">
+                                            <div class="w-12 h-12 mx-auto rounded-full shadow-lg flex items-center justify-center text-xl mb-1" style="background: linear-gradient(135deg, ${candy.color}, ${candy.color}cc);">
+                                                ${candy.emoji}
+                                            </div>
+                                            <div class="text-center text-xs">
+                                                <div class="font-bold text-white">${candy.name}</div>
+                                                <div class="text-yellow-300 font-bold">$${candy.price}</div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(levelDiv);
+            }
+
+            // Add candy selection handlers
+            document.querySelectorAll('.candy-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const level = parseInt(this.closest('[data-level]').dataset.level);
+                    const wall = parseInt(this.closest('.wall-selector').querySelector('[data-wall]').dataset.wall);
+
+                    if (!appState.boxConfig[level]) appState.boxConfig[level] = [[], [], [], []];
+                    if (!appState.boxConfig[level][wall]) appState.boxConfig[level][wall] = [];
+
+                    const candyData = Object.values(candies).flat().find(c => c.id == this.dataset.candyId);
+                    appState.boxConfig[level][wall].push(candyData);
+
+                    if (appState.boxConfig[level][wall].length > 5) {
+                        appState.boxConfig[level][wall].shift(); // Keep max 5 per wall
+                    }
+
+                    updateCandyWallDisplay(level, wall);
+                    updatePreview();
+                    updateCart();
+                });
+            });
+        }
+
+        function updateCandyWallDisplay(level, wall) {
+            const wallSelector = document.querySelector(`[data-level="${level}"] [data-wall="${wall}"] .candy-grid`);
+            const selectedCandies = appState.boxConfig[level]?.[wall] || [];
+            wallSelector.innerHTML = `
+                ${candies[['small', 'medium', 'large'][Math.min(level, 2)]].map(candy => {
+                    const isSelected = selectedCandies.some(c => c.id === candy.id);
+                    return `
+                        <div class="candy-option p-2 rounded-lg cursor-pointer hover:scale-110 transition-all ${isSelected ? 'ring-4 ring-yellow-400 ring-opacity-50' : ''}" data-candy-id="${candy.id}">
+                            <div class="w-12 h-12 mx-auto rounded-full shadow-lg flex items-center justify-center text-xl mb-1" style="background: linear-gradient(135deg, ${candy.color}, ${candy.color}cc);">
+                                ${candy.emoji}
+                            </div>
+                            <div class="text-center text-xs">
+                                <div class="font-bold text-white">${candy.name}</div>
+                                <div class="text-yellow-300 font-bold">$${candy.price}</div>
+                                ${isSelected ? '<div class="text-xs text-green-300 mt-1">✓ Selected</div>' : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+        }
+
+        function updateCart() {
+            appState.cart = [];
+            appState.total = 29.99; // Base box price
+
+            for (let level in appState.boxConfig) {
+                for (let wall in appState.boxConfig[level]) {
+                    appState.boxConfig[level][wall].forEach(candy => {
+                        const existing = appState.cart.find(item => item.id === candy.id);
+                        if (existing) {
+                            existing.quantity++;
+                        } else {
+                            appState.cart.push({ ...candy, quantity: 1 });
+                        }
+                        appState.total += candy.price;
+                    });
+                }
+            }
+
+            updateCartDisplay();
+        }
+
+        function showCartSummary() {
+            const container = document.getElementById('cartSummary');
+            container.innerHTML = `
+                <div class="glass-effect p-6 rounded-2xl mb-6">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <span class="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl flex items-center justify-center mr-3 text-lg font-black text-gray-900">1</span>
+                        Premium Nested Gift Box
+                    </h3>
+                    <div class="text-white/70 mb-3">Up to ${appState.levels * 4 * 5} custom candies</div>
+                    <div class="text-2xl font-bold text-yellow-400">$29.99</div>
+                </div>
+                ${appState.cart.map(item => `
+                    <div class="flex justify-between items-center p-4 bg-white/10 backdrop-blur-sm rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-lg" style="background: linear-gradient(135deg, ${item.color}, ${item.color}cc);">
+                                ${item.emoji}
+                            </div>
+                            <div>
+                                <div class="font-bold text-white">${item.name}</div>
+                                <div class="text-white/70 text-sm">${item.quantity}x</div>
+                            </div>
+                        </div>
+                        <div class="text-xl font-bold text-yellow-400">$${item.price.toFixed(2)}</div>
+                    </div>
+                `).join('')}
+            `;
+            document.getElementById('finalTotal').textContent = appState.total.toFixed(2);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initThreeJS();
+
+            // Level selection
+            document.querySelectorAll('.level-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    appState.levels = parseInt(this.dataset.levels);
+                    appState.boxConfig = {};
+                    appState.cart = [];
+                    generateLevelSelector();
+                    showStep(2);
+                });
+            });
+
+            // Navigation
+            document.getElementById('backToLevels').addEventListener('click', () => showStep(1));
+            document.getElementById('nextToCart').addEventListener('click', () => {
+                updateCart();
+                showCartSummary();
+                showStep(3);
+            });
+            document.getElementById('backToCandy').addEventListener('click', () => showStep(2));
+            document.getElementById('nextToShipping').addEventListener('click', () => showStep(4));
+            document.getElementById('backToCart').addEventListener('click', () => showStep(3));
+
+            // Order placement
+            document.getElementById('placeOrder').addEventListener('click', function() {
+                if (document.getElementById('shippingForm').checkValidity()) {
+                    const orderNumber = 'SN' + Date.now().toString().slice(-6);
+                    document.getElementById('orderNumber').textContent = orderNumber;
+                    document.getElementById('successModal').classList.remove('hidden');
+                }
+            });
+
+            document.getElementById('completeOrder').addEventListener('click', function() {
+                location.reload();
+            });
+
+            // Resize handler
+            window.addEventListener('resize', () => {
+                const canvas = document.getElementById('threeCanvas');
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            });
+        });
+
+        // Responsive class toggles
+        const classNames = ['step-active', 'step-hidden'];
+        const toggleClasses = (el, fromClass, toClass) => {
+            el.classList.remove(fromClass);
+            el.classList.add(toClass);
+        };
+    </script>
+</body>
+</html>
+
