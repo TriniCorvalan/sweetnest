@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: sweetnest
+      POSTGRES_PASSWORD: sweetnest
+      POSTGRES_DB: sweetnest_development
+    volumes:
+      - sweetnest_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./sweetnest
+    environment:
+      RAILS_ENV: development
+      SECRET_KEY_BASE: sweetnest-dev-secret-key-base-change-me
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: sweetnest
+      DATABASE_PASSWORD: sweetnest
+      DATABASE_NAME: sweetnest_development
+    depends_on:
+      - db
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./sweetnest:/app
+
+  frontend:
+    image: nginx:1.27-alpine
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  sweetnest_pgdata:

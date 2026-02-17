@@ -1,0 +1,30 @@
+.DS_Store
+
+# Local bootstrap/vendor scaffolding (not source)
+.bootstrap/
+
+# Rails (app lives in /sweetnest)
+sweetnest/log/
+sweetnest/tmp/
+sweetnest/storage/
+sweetnest/public/assets/
+sweetnest/public/packs/
+sweetnest/public/packs-test/
+
+# Secrets (never commit)
+sweetnest/config/master.key
+sweetnest/config/credentials*.key
+
+# Ruby/Bundler
+sweetnest/vendor/bundle/
+sweetnest/.bundle/
+
+# Node
+sweetnest/node_modules/
+
+# Env files
+.env
+.env.*
+
+# Editor swap files
+*.swp

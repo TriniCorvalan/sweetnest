@@ -1,0 +1,21 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+  port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
+  username: <%= ENV.fetch("DATABASE_USERNAME", "sweetnest") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "sweetnest") %>
+
+development:
+  <<: *default
+  database: <%= ENV.fetch("DATABASE_NAME", "sweetnest_development") %>
+
+test:
+  <<: *default
+  database: sweetnest_test
+
+production:
+  <<: *default
+  database: <%= ENV.fetch("DATABASE_NAME", "sweetnest_production") %>
+
