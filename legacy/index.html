@@ -7,7 +7,7 @@
     <title>Nested Candy Box Creator - SweetNest</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- OrbitControls no disponible en esta versión por CDN; la vista previa 3D funciona sin rotación por ratón -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         * { font-family: 'Poppins', sans-serif; }
@@ -21,6 +21,8 @@
         .progress-fill { transition: width 0.4s ease; }
         .btn-glow { transition: all 0.3s ease; }
         .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+        .step-hidden { display: none !important; }
+        .step-active { display: block; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-400 via-pink-500 to-orange-400 min-h-screen overflow-x-hidden">
@@ -219,42 +221,55 @@
         // Three.js Scene Setup
         let scene, camera, renderer, controls;
         function initThreeJS() {
-            const canvas = document.getElementById('threeCanvas');
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x1a0b2e);
+            try {
+                const canvas = document.getElementById('threeCanvas');
+                if (!canvas) return;
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x1a0b2e);
 
-            camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            canvas.appendChild(renderer.domElement);
+                const w = Math.max(canvas.clientWidth || 400, 1);
+                const h = Math.max(canvas.clientHeight || 300, 1);
+                camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(w, h);
+                if (renderer.shadowMap) {
+                    renderer.shadowMap.enabled = true;
+                    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                }
+                canvas.appendChild(renderer.domElement);
 
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-            scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(5, 5, 5);
-            directionalLight.castShadow = true;
-            scene.add(directionalLight);
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+                scene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(5, 5, 5);
+                directionalLight.castShadow = true;
+                scene.add(directionalLight);
 
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.autoRotate = true;
-            controls.autoRotateSpeed = 1.0;
-
-            camera.position.z = 5;
-
-            animate();
+                if (typeof THREE.OrbitControls !== 'undefined') {
+                    controls = new THREE.OrbitControls(camera, renderer.domElement);
+                    controls.enableDamping = true;
+                    controls.autoRotate = true;
+                    controls.autoRotateSpeed = 1.0;
+                }
+                camera.position.z = 5;
+                animate();
+            } catch (e) {
+                console.warn('Preview 3D no disponible:', e);
+                const canvas = document.getElementById('threeCanvas');
+                if (canvas) canvas.innerHTML = '<div class="flex items-center justify-center h-full text-white/80 p-4 text-center">Vista previa no disponible</div>';
+            }
         }
 
         function animate() {
+            if (!renderer || !scene || !camera) return;
             requestAnimationFrame(animate);
-            controls.update();
+            if (controls && controls.update) controls.update();
             renderer.render(scene, camera);
         }
 
         // Update 3D Preview
         function updatePreview() {
+            if (!scene) return;
             // Clear existing meshes
             while(scene.children.length > 2) {
                 scene.remove(scene.children[2]);
@@ -368,16 +383,21 @@
                 container.appendChild(levelDiv);
             }
 
-            // Add candy selection handlers
-            document.querySelectorAll('.candy-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    const level = parseInt(this.closest('[data-level]').dataset.level);
-                    const wall = parseInt(this.closest('.wall-selector').querySelector('[data-wall]').dataset.wall);
+            // Add candy selection handlers (delegated, survives innerHTML updates)
+            if (!container.dataset.handlersBound) {
+                container.addEventListener('click', function(event) {
+                    const option = event.target.closest('.candy-option');
+                    if (!option || !container.contains(option)) return;
+
+                    const level = parseInt(option.closest('[data-level]')?.dataset.level, 10);
+                    const wall = parseInt(option.closest('[data-wall]')?.dataset.wall, 10);
+                    if (Number.isNaN(level) || Number.isNaN(wall)) return;
 
                     if (!appState.boxConfig[level]) appState.boxConfig[level] = [[], [], [], []];
                     if (!appState.boxConfig[level][wall]) appState.boxConfig[level][wall] = [];
 
-                    const candyData = Object.values(candies).flat().find(c => c.id == this.dataset.candyId);
+                    const candyData = Object.values(candies).flat().find(c => c.id == option.dataset.candyId);
+                    if (!candyData) return;
                     appState.boxConfig[level][wall].push(candyData);
 
                     if (appState.boxConfig[level][wall].length > 5) {
@@ -388,11 +408,13 @@
                     updatePreview();
                     updateCart();
                 });
-            });
+                container.dataset.handlersBound = 'true';
+            }
         }
 
         function updateCandyWallDisplay(level, wall) {
-            const wallSelector = document.querySelector(`[data-level="${level}"] [data-wall="${wall}"] .candy-grid`);
+            const wallSelector = document.querySelector(`[data-level="${level}"] [data-wall="${wall}"]`);
+            if (!wallSelector) return;
             const selectedCandies = appState.boxConfig[level]?.[wall] || [];
             wallSelector.innerHTML = `
                 ${candies[['small', 'medium', 'large'][Math.min(level, 2)]].map(candy => {
@@ -463,8 +485,10 @@
             document.getElementById('finalTotal').textContent = appState.total.toFixed(2);
         }
 
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', function() {
+        function initializeApp() {
+            if (window.__sweetNestInitialized) return;
+            window.__sweetNestInitialized = true;
+
             initThreeJS();
 
             // Level selection
@@ -504,12 +528,23 @@
 
             // Resize handler
             window.addEventListener('resize', () => {
+                if (!camera || !renderer) return;
                 const canvas = document.getElementById('threeCanvas');
-                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                const w = canvas.clientWidth || 400;
+                const h = canvas.clientHeight || 300;
+                camera.aspect = w / h;
                 camera.updateProjectionMatrix();
-                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+                renderer.setSize(w, h);
             });
-        });
+        }
+
+        // Event Listeners
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp, { once: true });
+        } else {
+            initializeApp();
+        }
+        document.addEventListener('turbo:load', initializeApp);
 
         // Responsive class toggles
         const classNames = ['step-active', 'step-hidden'];
