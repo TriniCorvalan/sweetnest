@@ -11,7 +11,10 @@ class OrdersController < ApplicationController
     errors = []
     errors << "levels debe ser 1..3" unless (1..3).cover?(levels)
 
-    %w[full_name street city zip].each do |field|
+    shipping["zip"] = shipping["zip"].to_s.strip
+    shipping["zip"] = "0000000" if shipping["zip"].blank?
+
+    %w[full_name rut phone email street region commune].each do |field|
       errors << "shipping.#{field} es requerido" if shipping[field].to_s.strip.empty?
     end
 
@@ -68,9 +71,14 @@ class OrdersController < ApplicationController
 
       order.create_address!(
         full_name: shipping["full_name"],
+        rut: shipping["rut"],
+        phone: shipping["phone"],
+        email: shipping["email"],
         street: shipping["street"],
         unit: shipping["unit"],
-        city: shipping["city"],
+        region: shipping["region"],
+        commune: shipping["commune"],
+        city: [shipping["commune"], shipping["region"]].compact.join(", "),
         zip: shipping["zip"],
         special_instructions: shipping["special_instructions"]
       )

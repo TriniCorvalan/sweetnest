@@ -86,17 +86,28 @@
 
     var state = window.Sweetnest.state;
     window.Sweetnest.computeCart();
+    var commune = ((document.getElementById("shipping_city") || {}).value || "").trim();
+    var region = ((document.getElementById("shipping_region") || {}).value || "").trim();
+    var rut = ((document.getElementById("shipping_rut") || {}).value || "").trim();
+    var phone = ((document.getElementById("shipping_phone") || {}).value || "").trim();
+    var email = ((document.getElementById("shipping_email") || {}).value || "").trim();
+    var notes = ((document.getElementById("shipping_special_instructions") || {}).value || "").trim();
 
     var payload = {
       levels: state.levels,
       box_config: window.Sweetnest.serializeBoxConfig(),
       shipping: {
         full_name: (document.getElementById("shipping_full_name") || {}).value,
+        rut: rut,
+        phone: phone,
+        email: email,
         street: (document.getElementById("shipping_street") || {}).value,
         unit: (document.getElementById("shipping_unit") || {}).value,
-        city: (document.getElementById("shipping_city") || {}).value,
-        zip: (document.getElementById("shipping_zip") || {}).value,
-        special_instructions: (document.getElementById("shipping_special_instructions") || {}).value
+        region: region,
+        commune: commune,
+        city: [commune, region].filter(Boolean).join(", "),
+        zip: "0000000",
+        special_instructions: notes
       },
       total: Number(state.total || 0)
     };

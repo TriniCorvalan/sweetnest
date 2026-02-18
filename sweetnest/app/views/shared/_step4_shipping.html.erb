@@ -11,29 +11,63 @@
 
         <div class="grid md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-white mb-2 font-medium" for="shipping_street">Direccion</label>
-            <input id="shipping_street" type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="Calle Dulce 123">
+            <label class="block text-white mb-2 font-medium" for="shipping_rut">RUT</label>
+            <input id="shipping_rut" type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="12.345.678-9">
           </div>
           <div>
-            <label class="block text-white mb-2 font-medium" for="shipping_unit">Piso/Unidad (opcional)</label>
-            <input id="shipping_unit" type="text" class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="Piso 4B">
+            <label class="block text-white mb-2 font-medium" for="shipping_phone">Telefono de contacto</label>
+            <input id="shipping_phone" type="tel" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="+56 9 1234 5678">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-white mb-2 font-medium" for="shipping_email">Correo electronico</label>
+          <input id="shipping_email" type="email" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="ana@correo.cl">
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white mb-2 font-medium" for="shipping_street">Calle y numero</label>
+            <input id="shipping_street" type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="Av. Providencia 1234">
+          </div>
+          <div>
+            <label class="block text-white mb-2 font-medium" for="shipping_unit">Depto/Casa (opcional)</label>
+            <input id="shipping_unit" type="text" class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="Depto 1203">
           </div>
         </div>
 
         <div class="grid md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-white mb-2 font-medium" for="shipping_city">Ciudad</label>
-            <input id="shipping_city" type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="Dulceville">
+            <label class="block text-white mb-2 font-medium" for="shipping_region">Region</label>
+            <select id="shipping_region" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white focus:outline-none focus:border-white/50 transition-all">
+              <option value="" class="text-gray-900">Selecciona una region</option>
+              <option value="Arica y Parinacota" class="text-gray-900">Arica y Parinacota</option>
+              <option value="Tarapaca" class="text-gray-900">Tarapaca</option>
+              <option value="Antofagasta" class="text-gray-900">Antofagasta</option>
+              <option value="Atacama" class="text-gray-900">Atacama</option>
+              <option value="Coquimbo" class="text-gray-900">Coquimbo</option>
+              <option value="Valparaiso" class="text-gray-900">Valparaiso</option>
+              <option value="Metropolitana de Santiago" class="text-gray-900">Metropolitana de Santiago</option>
+              <option value="O'Higgins" class="text-gray-900">O'Higgins</option>
+              <option value="Maule" class="text-gray-900">Maule</option>
+              <option value="Nuble" class="text-gray-900">Nuble</option>
+              <option value="Biobio" class="text-gray-900">Biobio</option>
+              <option value="La Araucania" class="text-gray-900">La Araucania</option>
+              <option value="Los Rios" class="text-gray-900">Los Rios</option>
+              <option value="Los Lagos" class="text-gray-900">Los Lagos</option>
+              <option value="Aysen" class="text-gray-900">Aysen</option>
+              <option value="Magallanes" class="text-gray-900">Magallanes</option>
+            </select>
           </div>
           <div>
-            <label class="block text-white mb-2 font-medium" for="shipping_zip">Codigo postal</label>
-            <input id="shipping_zip" type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="12345">
+            <label class="block text-white mb-2 font-medium" for="shipping_city">Comuna</label>
+            <input id="shipping_city" type="text" required class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" placeholder="Providencia">
           </div>
         </div>
 
         <div>
-          <label class="block text-white mb-2 font-medium" for="shipping_special_instructions">Instrucciones especiales</label>
-          <textarea id="shipping_special_instructions" class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" rows="3" placeholder="Dejar en recepcion..."></textarea>
+          <label class="block text-white mb-2 font-medium" for="shipping_special_instructions">Referencia para entrega</label>
+          <textarea id="shipping_special_instructions" class="w-full p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/50 transition-all" rows="3" placeholder="Porton azul, conserjeria 24h..."></textarea>
         </div>
       </form>
     </div>

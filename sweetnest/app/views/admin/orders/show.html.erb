@@ -43,12 +43,15 @@
     <h2 class="text-2xl font-bold mb-4">Datos de entrega</h2>
     <% if @address.present? %>
       <div><strong>Nombre:</strong> <%= @address.full_name %></div>
+      <div><strong>Email:</strong> <%= @address.email %></div>
+      <div><strong>RUT:</strong> <%= @address.rut %></div>
+      <div><strong>Telefono:</strong> <%= @address.phone %></div>
       <div><strong>Direccion:</strong> <%= @address.street %> <%= @address.unit.presence || "" %></div>
-      <div><strong>Comuna/Region:</strong> <%= @address.city %></div>
-      <div><strong>Codigo postal:</strong> <%= @address.zip %></div>
+      <div><strong>Comuna:</strong> <%= @address.commune.presence || @address.city %></div>
+      <div><strong>Region:</strong> <%= @address.region.presence || "-" %></div>
       <div><strong>Instrucciones:</strong> <%= @address.special_instructions.presence || "-" %></div>
     <% else %>
-      <p class="text-white/70">No hay direccion asociada.</p>
+      <p class="text-white/70">No hay dirección asociada.</p>
     <% end %>
   </div>
 
