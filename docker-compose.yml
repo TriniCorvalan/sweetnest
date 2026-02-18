@@ -21,6 +21,8 @@ services:
       DATABASE_USERNAME: sweetnest
       DATABASE_PASSWORD: sweetnest
       DATABASE_NAME: sweetnest_development
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     depends_on:
       - db
     expose:
