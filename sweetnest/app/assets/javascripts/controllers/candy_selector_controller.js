@@ -124,6 +124,7 @@
         "</h3>" +
         '<div class="grid grid-cols-2 md:grid-cols-4 gap-3" data-level="' + i + '">' +
           [0,1,2,3].map(function (wall) {
+            var selected = (state.boxConfig && state.boxConfig[i] && state.boxConfig[i][wall]) ? state.boxConfig[i][wall] : [];
             return (
               '<div class="wall-selector p-4 rounded-xl bg-white/10 border-2 border-dashed border-white/30 hover:border-white/60 transition-all">' +
                 '<div class="text-center mb-3">' +
@@ -136,12 +137,15 @@
                   candies.map(function (candy) {
                     var stock = Number((candy && candy.stock) || 0);
                     var outOfStock = stock <= 0;
-                    var optClass = outOfStock
+                    var count = selected.filter(function (c) { return Number(c.id) === Number(candy.id); }).length;
+                    var optClass = outOfStock && count <= 0
                       ? "candy-option p-2 rounded-lg cursor-not-allowed opacity-50 transition-all"
                       : "candy-option p-2 rounded-lg cursor-pointer hover:scale-110 transition-all";
                     var subline = outOfStock
                       ? '<div class="text-rose-200 font-bold">Sin stock</div>'
                       : '<div class="text-yellow-300 font-bold">$' + Number(candy.price).toFixed(2) + "</div>";
+                    var minusDisabled = count <= 0;
+                    var plusDisabled = outOfStock;
                     return (
                       '<div class="' + optClass + '" data-candy-id="' + candy.id + '" data-disabled="' + (outOfStock ? "true" : "false") + '">' +
                         '<div class="w-12 h-12 mx-auto rounded-full shadow-lg flex items-center justify-center text-xl mb-1" style="background: linear-gradient(135deg, ' + candy.color_hex + ", " + candy.color_hex + 'cc);">' +
@@ -150,6 +154,15 @@
                         '<div class="text-center text-xs">' +
                           '<div class="font-bold text-white">' + candy.name + "</div>" +
                           subline +
+                        "</div>" +
+                        '<div class="mt-2 flex items-center justify-center gap-2">' +
+                          '<button type="button" data-adjust="minus" class="w-7 h-7 rounded-lg bg-white/10 border border-white/20 text-white font-bold ' + (minusDisabled ? "opacity-40 cursor-not-allowed" : "hover:bg-white/20") + '">' +
+                            "−" +
+                          "</button>" +
+                          '<span class="min-w-[1.5rem] text-center text-white/90 font-bold text-xs">' + String(count) + "</span>" +
+                          '<button type="button" data-adjust="plus" class="w-7 h-7 rounded-lg bg-white/10 border border-white/20 text-white font-bold ' + (plusDisabled ? "opacity-40 cursor-not-allowed" : "hover:bg-white/20") + '">' +
+                            "+" +
+                          "</button>" +
                         "</div>" +
                       "</div>"
                     );
@@ -169,7 +182,12 @@
   };
 
   CandySelectorController.prototype.onCandyClick = function (event) {
-    if (event.currentTarget.getAttribute("data-disabled") === "true") return;
+    var adjustEl = event.target && event.target.closest ? event.target.closest("[data-adjust]") : null;
+    var adjust = adjustEl ? adjustEl.getAttribute("data-adjust") : null;
+    if (adjustEl) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
 
     var candyId = Number(event.currentTarget.getAttribute("data-candy-id"));
     var levelEl = event.currentTarget.closest("[data-level]");
@@ -194,20 +212,34 @@
     // Si el backend mandó allowed_levels, respétalo también en el click.
     var allowed = (candy && candy.allowed_levels) || [];
     if (allowed && allowed.length > 0 && allowed.map(Number).indexOf(level + 1) === -1) return;
-    if (Number((candy && candy.stock) || 0) <= 0) return;
 
-    var nextWeight = window.Sweetnest.candyWeightUnits ? window.Sweetnest.candyWeightUnits(candy) : 1;
-    var cap = window.Sweetnest.wallCapacityUnits ? window.Sweetnest.wallCapacityUnits(level) : 5;
-    var load = window.Sweetnest.wallLoadUnits ? window.Sweetnest.wallLoadUnits(level, wall) : state.boxConfig[level][wall].length;
-    if (load + nextWeight > cap) {
-      window.alert("Esta pared ya alcanzó el máximo para este nivel.");
-      return;
+    if (adjust === "minus") {
+      var arr = state.boxConfig[level][wall];
+      for (var idx = arr.length - 1; idx >= 0; idx--) {
+        if (Number(arr[idx] && arr[idx].id) === Number(candy.id)) {
+          arr.splice(idx, 1);
+          break;
+        }
+      }
+    } else {
+      // plus o click en la tarjeta completa
+      if (Number((candy && candy.stock) || 0) <= 0) return;
+
+      var nextWeight = window.Sweetnest.candyWeightUnits ? window.Sweetnest.candyWeightUnits(candy) : 1;
+      var cap = window.Sweetnest.wallCapacityUnits ? window.Sweetnest.wallCapacityUnits(level) : 4;
+      var load = window.Sweetnest.wallLoadUnits ? window.Sweetnest.wallLoadUnits(level, wall) : state.boxConfig[level][wall].length;
+      if (load + nextWeight > cap) {
+        window.alert("Esta pared ya alcanzó el máximo para este nivel.");
+        return;
+      }
+
+      state.boxConfig[level][wall].push(candy);
     }
-
-    state.boxConfig[level][wall].push(candy);
 
     window.Sweetnest.computeCart();
     window.Sweetnest.dispatch("sweetnest:configChanged", { level: level, wall: wall });
+    // Re-render para actualizar contadores y estados de botones.
+    this.renderLevelSelector();
   };
 
   window.SweetNestCandySelectorController = CandySelectorController;

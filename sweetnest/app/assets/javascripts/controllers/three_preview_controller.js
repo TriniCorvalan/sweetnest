@@ -4,8 +4,10 @@
 
   ThreePreviewController.prototype.connect = function () {
     this._onConfigChanged = this.updatePreview.bind(this);
+    this._onPreviewClick = this.onPreviewClick.bind(this);
     document.addEventListener("sweetnest:configChanged", this._onConfigChanged);
     document.addEventListener("sweetnest:levelsSelected", this._onConfigChanged);
+    this.element.addEventListener("click", this._onPreviewClick);
 
     this.updatePreview();
   };
@@ -14,6 +16,9 @@
     if (this._onConfigChanged) {
       document.removeEventListener("sweetnest:configChanged", this._onConfigChanged);
       document.removeEventListener("sweetnest:levelsSelected", this._onConfigChanged);
+    }
+    if (this._onPreviewClick) {
+      this.element.removeEventListener("click", this._onPreviewClick);
     }
   };
 
@@ -29,6 +34,30 @@
     var state = window.Sweetnest && window.Sweetnest.state;
     if (!state) return;
     this.renderFlat();
+  };
+
+  ThreePreviewController.prototype.onPreviewClick = function (event) {
+    var state = window.Sweetnest && window.Sweetnest.state;
+    if (!state) return;
+
+    var removeBtn = event.target && event.target.closest ? event.target.closest("[data-preview-remove-one]") : null;
+    if (removeBtn) {
+      event.preventDefault();
+      var level = Number(removeBtn.getAttribute("data-level"));
+      var wall = Number(removeBtn.getAttribute("data-wall"));
+      var candyIndex = Number(removeBtn.getAttribute("data-candy-index"));
+
+      if (!state.boxConfig[level]) state.boxConfig[level] = [[], [], [], []];
+      var arr = state.boxConfig[level][wall] || [];
+      if (Number.isFinite(candyIndex) && candyIndex >= 0 && candyIndex < arr.length) {
+        arr.splice(candyIndex, 1);
+      }
+
+      state.boxConfig[level][wall] = arr;
+      window.Sweetnest.computeCart();
+      window.Sweetnest.dispatch("sweetnest:configChanged", { level: level, wall: wall });
+      return;
+    }
   };
 
   ThreePreviewController.prototype.renderFlat = function () {
@@ -74,7 +103,10 @@
           html += '<div class="flex flex-wrap gap-2 items-center">';
           for (var c = 0; c < shown.length; c++) {
             var emoji = shown[c] && shown[c].emoji ? String(shown[c].emoji) : "🍬";
-            html += '<span class="w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-lg">' + emoji + "</span>";
+            html += '<span class="relative w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-lg">';
+            html += emoji;
+            html += '<button type="button" title="Quitar 1" data-preview-remove-one data-level="' + String(i) + '" data-wall="' + String(w) + '" data-candy-index="' + String(c) + '" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-rose-500/80 text-white text-[10px] leading-[20px] border border-white/20 hover:bg-rose-500">✕</button>';
+            html += "</span>";
           }
           if (overflow > 0) {
             html += '<span class="px-2 py-1 rounded-xl bg-white/10 border border-white/10 text-white/80 text-xs font-bold">+' + String(overflow) + "</span>";
