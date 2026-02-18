@@ -1,0 +1,14 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="glass-effect rounded-3xl p-8 shadow-glow text-white">
+    <div class="flex items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-3xl font-bold">Nuevo dulce</h1>
+        <p class="text-white/70">Agrega un candy con stock y restricciones</p>
+      </div>
+      <%= link_to "← Volver", admin_candies_path, class: "text-white/90 underline hover:text-white" %>
+    </div>
+
+    <%= render "form" %>
+  </div>
+</div>
+

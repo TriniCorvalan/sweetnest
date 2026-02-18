@@ -1,0 +1,77 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="glass-effect rounded-3xl p-8 shadow-glow">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-white">Admin - Dulces</h1>
+        <p class="text-white/70">Gestiona catálogo, stock y restricción por nivel</p>
+      </div>
+
+      <div class="flex gap-3 items-center">
+        <%= link_to "Pedidos", admin_orders_path, class: "bg-white/20 text-white px-4 py-2 rounded-xl border border-white/30 hover:bg-white/30" %>
+        <%= link_to "Nuevo dulce", new_admin_candy_path, class: "bg-gradient-to-r from-emerald-400 to-teal-500 text-white px-4 py-2 rounded-xl font-bold shadow-glow hover:shadow-2xl btn-glow" %>
+      </div>
+    </div>
+
+    <% if flash[:notice].present? %>
+      <div class="mb-4 p-3 rounded-xl bg-emerald-500/30 text-emerald-100 border border-emerald-300/40"><%= flash[:notice] %></div>
+    <% end %>
+    <% if flash[:alert].present? %>
+      <div class="mb-4 p-3 rounded-xl bg-rose-500/30 text-rose-100 border border-rose-300/40"><%= flash[:alert] %></div>
+    <% end %>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm text-left">
+        <thead>
+          <tr class="text-white/80 border-b border-white/20">
+            <th class="py-3 pr-4">ID</th>
+            <th class="py-3 pr-4">Dulce</th>
+            <th class="py-3 pr-4">Tamaño</th>
+            <th class="py-3 pr-4">Precio</th>
+            <th class="py-3 pr-4">Stock</th>
+            <th class="py-3 pr-4">Niveles permitidos</th>
+            <th class="py-3 pr-4"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @candies.each do |candy| %>
+            <tr class="border-b border-white/10 text-white/95">
+              <td class="py-3 pr-4"><%= candy.id %></td>
+              <td class="py-3 pr-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg" style="background: linear-gradient(135deg, <%= candy.color_hex %>, <%= candy.color_hex %>cc);">
+                    <%= candy.emoji %>
+                  </div>
+                  <div>
+                    <div class="font-semibold"><%= candy.name %></div>
+                    <div class="text-white/70 text-xs"><%= candy.color_hex %></div>
+                  </div>
+                </div>
+              </td>
+              <td class="py-3 pr-4"><span class="px-2 py-1 rounded-lg bg-white/20 border border-white/20"><%= candy.size_category %></span></td>
+              <td class="py-3 pr-4">$<%= format("%.2f", candy.price.to_f) %></td>
+              <td class="py-3 pr-4">
+                <% stock = candy.stock.to_i %>
+                <% badge = stock > 0 ? "bg-emerald-500/20 border-emerald-300/30 text-emerald-100" : "bg-rose-500/20 border-rose-300/30 text-rose-100" %>
+                <span class="px-2 py-1 rounded-lg border <%= badge %>"><%= stock %></span>
+              </td>
+              <td class="py-3 pr-4">
+                <% levels = (candy.allowed_levels || []).map(&:to_i).sort %>
+                <%= levels.empty? ? "Todos" : levels.join(", ") %>
+              </td>
+              <td class="py-3 pr-4 whitespace-nowrap">
+                <%= link_to "Editar", edit_admin_candy_path(candy), class: "underline text-yellow-200 hover:text-white mr-3" %>
+                <%= button_to "Eliminar", admin_candy_path(candy), method: :delete, data: { confirm: "¿Eliminar '#{candy.name}'?" }, class: "underline text-rose-200 hover:text-white bg-transparent p-0 inline" %>
+              </td>
+            </tr>
+          <% end %>
+          <% if @candies.empty? %>
+            <tr>
+              <td colspan="7" class="py-8 text-center text-white/70">No hay dulces para mostrar.</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

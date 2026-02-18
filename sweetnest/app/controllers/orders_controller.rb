@@ -23,8 +23,81 @@ class OrdersController < ApplicationController
     end
 
     order = nil
+    requested_entries = []
+    requested_totals = Hash.new(0)
+
+    # Normaliza box_config a una lista de {level_index, wall_position, candy_id, quantity}
+    box_config.each do |level_key, walls|
+      level_index = level_key.to_i
+      next unless (0...levels).cover?(level_index)
+      next unless walls.is_a?(Hash)
+
+      walls.each do |wall_key, entries|
+        wall_position = wall_key.to_i
+        next unless (0..3).cover?(wall_position)
+
+        Array(entries).each do |entry|
+          next unless entry.is_a?(Hash)
+
+          candy_id = entry["candy_id"].to_i
+          quantity = entry["quantity"].to_i
+          next if candy_id <= 0 || quantity <= 0
+
+          requested_entries << {
+            level_index: level_index,
+            wall_position: wall_position,
+            candy_id: candy_id,
+            quantity: quantity
+          }
+          requested_totals[candy_id] += quantity
+        end
+      end
+    end
 
     ActiveRecord::Base.transaction do
+      # Bloqueo de stock y validaciones (evita sobreventa y pedidos inválidos si se manipula el payload).
+      if requested_entries.any?
+        candies_by_id = Candy.lock.where(id: requested_totals.keys).index_by(&:id)
+        missing_ids = requested_totals.keys - candies_by_id.keys
+        if missing_ids.any?
+          invalid = Order.new
+          invalid.errors.add(:base, "Hay dulces inválidos en la selección (ids: #{missing_ids.join(', ')})")
+          raise ActiveRecord::RecordInvalid, invalid
+        end
+
+        requested_entries.each do |entry|
+          candy = candies_by_id[entry[:candy_id]]
+          level_number = entry[:level_index] + 1
+          expected_size = %w[small medium large][[entry[:level_index], 2].min]
+
+          unless candy.allowed_on_level?(level_number)
+            invalid = Order.new
+            invalid.errors.add(:base, "El dulce '#{candy.name}' no se puede agregar al nivel #{level_number}")
+            raise ActiveRecord::RecordInvalid, invalid
+          end
+
+          if candy.size_category != expected_size
+            invalid = Order.new
+            invalid.errors.add(:base, "El dulce '#{candy.name}' no corresponde al nivel #{level_number}")
+            raise ActiveRecord::RecordInvalid, invalid
+          end
+        end
+
+        requested_totals.each do |candy_id, qty|
+          candy = candies_by_id[candy_id]
+          if candy.stock.to_i < qty.to_i
+            invalid = Order.new
+            invalid.errors.add(:base, "Stock insuficiente para '#{candy.name}'. Disponible: #{candy.stock}, solicitado: #{qty}")
+            raise ActiveRecord::RecordInvalid, invalid
+          end
+        end
+
+        requested_totals.each do |candy_id, qty|
+          candy = candies_by_id[candy_id]
+          candy.update!(stock: candy.stock.to_i - qty.to_i)
+        end
+      end
+
       gift_box = GiftBox.create!(
         levels: levels,
         base_price: GiftBox::DEFAULT_BASE_PRICE,
@@ -35,32 +108,15 @@ class OrdersController < ApplicationController
         gift_box.box_levels.create!(level_number: level_number)
       end
 
-      box_config.each do |level_key, walls|
-        level_index = level_key.to_i
-        next unless (0...levels).cover?(level_index)
+      requested_entries.each do |entry|
+        box_level = box_levels[entry[:level_index]]
 
-        box_level = box_levels[level_index]
-        next unless walls.is_a?(Hash)
-
-        walls.each do |wall_key, entries|
-          wall_position = wall_key.to_i
-          next unless (0..3).cover?(wall_position)
-
-          Array(entries).each do |entry|
-            next unless entry.is_a?(Hash)
-
-            candy_id = entry["candy_id"].to_i
-            quantity = entry["quantity"].to_i
-            next if candy_id <= 0 || quantity <= 0
-
-            wall_candy = box_level.wall_candies.find_or_initialize_by(
-              wall_position: wall_position,
-              candy_id: candy_id
-            )
-            wall_candy.quantity = (wall_candy.quantity || 0) + quantity
-            wall_candy.save!
-          end
-        end
+        wall_candy = box_level.wall_candies.find_or_initialize_by(
+          wall_position: entry[:wall_position],
+          candy_id: entry[:candy_id]
+        )
+        wall_candy.quantity = (wall_candy.quantity || 0) + entry[:quantity]
+        wall_candy.save!
       end
 
       order = gift_box.build_order(

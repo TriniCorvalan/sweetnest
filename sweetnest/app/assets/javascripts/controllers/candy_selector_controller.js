@@ -114,14 +114,22 @@
                 "</div>" +
                 '<div class="candy-grid" data-wall="' + wall + '">' +
                   candies.map(function (candy) {
+                    var stock = Number((candy && candy.stock) || 0);
+                    var outOfStock = stock <= 0;
+                    var optClass = outOfStock
+                      ? "candy-option p-2 rounded-lg cursor-not-allowed opacity-50 transition-all"
+                      : "candy-option p-2 rounded-lg cursor-pointer hover:scale-110 transition-all";
+                    var subline = outOfStock
+                      ? '<div class="text-rose-200 font-bold">Sin stock</div>'
+                      : '<div class="text-yellow-300 font-bold">$' + Number(candy.price).toFixed(2) + "</div>";
                     return (
-                      '<div class="candy-option p-2 rounded-lg cursor-pointer hover:scale-110 transition-all" data-candy-id="' + candy.id + '">' +
+                      '<div class="' + optClass + '" data-candy-id="' + candy.id + '" data-disabled="' + (outOfStock ? "true" : "false") + '">' +
                         '<div class="w-12 h-12 mx-auto rounded-full shadow-lg flex items-center justify-center text-xl mb-1" style="background: linear-gradient(135deg, ' + candy.color_hex + ", " + candy.color_hex + 'cc);">' +
                           candy.emoji +
                         "</div>" +
                         '<div class="text-center text-xs">' +
                           '<div class="font-bold text-white">' + candy.name + "</div>" +
-                          '<div class="text-yellow-300 font-bold">$' + Number(candy.price).toFixed(2) + "</div>" +
+                          subline +
                         "</div>" +
                       "</div>"
                     );
@@ -141,6 +149,8 @@
   };
 
   CandySelectorController.prototype.onCandyClick = function (event) {
+    if (event.currentTarget.getAttribute("data-disabled") === "true") return;
+
     var candyId = Number(event.currentTarget.getAttribute("data-candy-id"));
     var levelEl = event.currentTarget.closest("[data-level]");
     var wallEl = event.currentTarget.closest(".wall-selector").querySelector("[data-wall]");
@@ -160,6 +170,7 @@
     // Si el backend mandó allowed_levels, respétalo también en el click.
     var allowed = (candy && candy.allowed_levels) || [];
     if (allowed && allowed.length > 0 && allowed.map(Number).indexOf(level + 1) === -1) return;
+    if (Number((candy && candy.stock) || 0) <= 0) return;
 
     state.boxConfig[level][wall].push(candy);
     if (state.boxConfig[level][wall].length > 5) state.boxConfig[level][wall].shift();

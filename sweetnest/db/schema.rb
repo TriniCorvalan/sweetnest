@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_02_18_000008) do
+ActiveRecord::Schema.define(version: 2026_02_18_000009) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,7 +52,10 @@ ActiveRecord::Schema.define(version: 2026_02_18_000008) do
     t.decimal "preview_size", precision: 4, scale: 2, default: "0.5", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "stock", default: 0, null: false
+    t.integer "allowed_levels", default: [], null: false, array: true
     t.index ["size_category"], name: "index_candies_on_size_category"
+    t.index ["stock"], name: "index_candies_on_stock"
   end
 
   create_table "gift_boxes", force: :cascade do |t|

@@ -1,0 +1,72 @@
+<% if @candy.errors.any? %>
+  <div class="mb-4 p-3 rounded-xl bg-rose-500/30 text-rose-100 border border-rose-300/40">
+    <div class="font-semibold mb-1">Revisa los errores:</div>
+    <ul class="list-disc pl-5">
+      <% @candy.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= form_with model: [:admin, @candy], local: true, class: "space-y-5" do |f| %>
+  <div class="grid md:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :name, "Nombre", class: "block text-white/90 mb-1" %>
+      <%= f.text_field :name, required: true, class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
+    </div>
+    <div>
+      <%= f.label :emoji, "Emoji", class: "block text-white/90 mb-1" %>
+      <%= f.text_field :emoji, required: true, class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-4">
+    <div>
+      <%= f.label :price, "Precio", class: "block text-white/90 mb-1" %>
+      <%= f.number_field :price, step: 0.01, min: 0, required: true, class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
+    </div>
+    <div>
+      <%= f.label :stock, "Stock", class: "block text-white/90 mb-1" %>
+      <%= f.number_field :stock, step: 1, min: 0, required: true, class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
+    </div>
+    <div>
+      <%= f.label :preview_size, "Preview size", class: "block text-white/90 mb-1" %>
+      <%= f.number_field :preview_size, step: 0.01, min: 0, required: true, class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :size_category, "Categoría de tamaño", class: "block text-white/90 mb-1" %>
+      <%= f.select :size_category, Candy::SIZE_CATEGORIES, {}, class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
+    </div>
+    <div>
+      <%= f.label :color_hex, "Color (hex)", class: "block text-white/90 mb-1" %>
+      <%= f.text_field :color_hex, required: true, placeholder: "#ff6b9d", class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
+    </div>
+  </div>
+
+  <div class="bg-white/10 rounded-2xl p-4 border border-white/20">
+    <div class="text-white font-semibold mb-2">Restricción por nivel (opcional)</div>
+    <div class="text-white/70 text-sm mb-3">
+      Si no marcas nada, este dulce se podrá usar en cualquier nivel donde calce por tamaño.
+    </div>
+
+    <% selected = Array(@candy.allowed_levels).map(&:to_i) %>
+    <div class="flex flex-wrap gap-4 text-white">
+      <% [1, 2, 3].each do |n| %>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" name="candy[allowed_levels][]" value="<%= n %>" <%= "checked" if selected.include?(n) %> class="accent-yellow-300" />
+          <span>Nivel <%= n %></span>
+        </label>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex gap-3">
+    <%= f.submit class: "bg-emerald-500/80 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl font-bold" %>
+    <%= link_to "Cancelar", admin_candies_path, class: "bg-white/20 text-white px-5 py-2 rounded-xl border border-white/30 hover:bg-white/30" %>
+  </div>
+<% end %>
+

@@ -6,5 +6,6 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :orders, only: [:index, :show, :update]
+    resources :candies, except: [:show]
   end
 end
