@@ -1,6 +1,15 @@
 # frozen_string_literal: true
 
-Candy.destroy_all
+# Orden de limpieza respetando llaves foraneas:
+# addresses -> orders
+# wall_candies -> box_levels -> gift_boxes
+# wall_candies -> candies
+Address.delete_all
+WallCandy.delete_all
+Order.delete_all
+BoxLevel.delete_all
+GiftBox.delete_all
+Candy.delete_all
 
 candies = [
   # small
