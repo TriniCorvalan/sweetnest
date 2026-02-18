@@ -85,8 +85,15 @@
     container.innerHTML = "";
 
     for (var i = 0; i < state.levels; i++) {
+      var levelNumber = i + 1;
       var sizeKey = this.sizeKeyForLevel(i);
       var candies = (this.candiesBySize && this.candiesBySize[sizeKey]) || [];
+      // Restricción opcional por nivel: si allowed_levels viene vacío, se permite en todos.
+      candies = candies.filter(function (c) {
+        var allowed = (c && c.allowed_levels) || [];
+        if (!allowed || allowed.length === 0) return true;
+        return allowed.map(Number).indexOf(levelNumber) !== -1;
+      });
 
       var wrapper = document.createElement("div");
       wrapper.className = "glass-effect rounded-2xl p-6 mb-6 shadow-glow level-enter-active";
@@ -150,6 +157,9 @@
     var candies = (this.candiesBySize && this.candiesBySize[sizeKey]) || [];
     var candy = candies.find(function (c) { return Number(c.id) === candyId; });
     if (!candy) return;
+    // Si el backend mandó allowed_levels, respétalo también en el click.
+    var allowed = (candy && candy.allowed_levels) || [];
+    if (allowed && allowed.length > 0 && allowed.map(Number).indexOf(level + 1) === -1) return;
 
     state.boxConfig[level][wall].push(candy);
     if (state.boxConfig[level][wall].length > 5) state.boxConfig[level][wall].shift();

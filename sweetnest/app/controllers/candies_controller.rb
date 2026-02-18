@@ -2,7 +2,7 @@
 
 class CandiesController < ApplicationController
   def index
-    candies = Candy.order(:id).to_a
+    candies = Candy.where("stock > 0").order(:id).to_a
 
     grouped = candies.group_by(&:size_category).transform_values do |arr|
       arr.map do |c|
@@ -13,7 +13,8 @@ class CandiesController < ApplicationController
           size_category: c.size_category,
           emoji: c.emoji,
           color_hex: c.color_hex,
-          preview_size: c.preview_size.to_f
+          preview_size: c.preview_size.to_f,
+          allowed_levels: (c.allowed_levels || []).map(&:to_i)
         }
       end
     end
