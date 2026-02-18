@@ -1,0 +1,77 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+  <div class="glass-effect rounded-3xl p-8 shadow-glow">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+      <div>
+        <h1 class="text-3xl font-bold text-white">Pedido <%= @order.order_number %></h1>
+        <p class="text-white/70">Creado <%= @order.created_at.strftime("%Y-%m-%d %H:%M") %></p>
+      </div>
+      <%= link_to "← Volver al listado", admin_orders_path, class: "text-white/90 underline hover:text-white" %>
+    </div>
+
+    <% if flash[:notice].present? %>
+      <div class="mb-4 p-3 rounded-xl bg-emerald-500/30 text-emerald-100 border border-emerald-300/40"><%= flash[:notice] %></div>
+    <% end %>
+    <% if flash[:alert].present? %>
+      <div class="mb-4 p-3 rounded-xl bg-rose-500/30 text-rose-100 border border-rose-300/40"><%= flash[:alert] %></div>
+    <% end %>
+
+    <div class="grid md:grid-cols-2 gap-4 text-white">
+      <div class="bg-white/10 rounded-2xl p-4 border border-white/20">
+        <div class="text-white/70 text-sm">Estado actual</div>
+        <div class="text-xl font-semibold"><%= @order.status %></div>
+      </div>
+      <div class="bg-white/10 rounded-2xl p-4 border border-white/20">
+        <div class="text-white/70 text-sm">Total estimado</div>
+        <div class="text-xl font-semibold">$<%= format("%.2f", order_total(@order)) %></div>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <%= form_with url: admin_order_path(@order), method: :patch, local: true, class: "flex flex-col sm:flex-row gap-3 items-start sm:items-center" do %>
+        <label for="status" class="text-white/90">Cambiar estado</label>
+        <select id="status" name="status" class="rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30">
+          <% available_statuses.each do |status| %>
+            <option value="<%= status %>" <%= "selected" if status == @order.status %>><%= status %></option>
+          <% end %>
+        </select>
+        <button type="submit" class="bg-emerald-500/80 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl">Guardar estado</button>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="glass-effect rounded-3xl p-8 shadow-glow text-white">
+    <h2 class="text-2xl font-bold mb-4">Datos de entrega</h2>
+    <% if @address.present? %>
+      <div><strong>Nombre:</strong> <%= @address.full_name %></div>
+      <div><strong>Direccion:</strong> <%= @address.street %> <%= @address.unit.presence || "" %></div>
+      <div><strong>Ciudad:</strong> <%= @address.city %></div>
+      <div><strong>Codigo postal:</strong> <%= @address.zip %></div>
+      <div><strong>Instrucciones:</strong> <%= @address.special_instructions.presence || "-" %></div>
+    <% else %>
+      <p class="text-white/70">No hay direccion asociada.</p>
+    <% end %>
+  </div>
+
+  <div class="glass-effect rounded-3xl p-8 shadow-glow text-white">
+    <h2 class="text-2xl font-bold mb-4">Contenido de SweetNest</h2>
+    <% wall_labels = ["Frente", "Derecha", "Atras", "Izquierda"] %>
+    <% @box_levels.each do |level| %>
+      <div class="mb-5 p-4 rounded-2xl bg-white/10 border border-white/20">
+        <h3 class="text-lg font-semibold mb-3">Nivel <%= level.level_number + 1 %></h3>
+        <% grouped = level.wall_candies.group_by(&:wall_position) %>
+        <% if grouped.empty? %>
+          <div class="text-white/70">Sin dulces registrados.</div>
+        <% else %>
+          <div class="space-y-2">
+            <% grouped.sort_by { |wall_position, _| wall_position }.each do |wall_position, entries| %>
+              <div>
+                <strong><%= wall_labels[wall_position] || "Pared #{wall_position}" %>:</strong>
+                <%= entries.map { |entry| "#{entry.candy.name} x#{entry.quantity}" }.join(", ") %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

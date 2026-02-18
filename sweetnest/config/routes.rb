@@ -3,4 +3,8 @@ Rails.application.routes.draw do
 
   resources :candies, only: [:index]
   resources :orders, only: [:create]
+
+  namespace :admin do
+    resources :orders, only: [:index, :show, :update]
+  end
 end
