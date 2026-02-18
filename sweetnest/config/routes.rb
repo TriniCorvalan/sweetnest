@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   resources :orders, only: [:create]
 
   namespace :admin do
+    get "logout", to: "sessions#logout"
     resources :orders, only: [:index, :show, :update]
     resources :candies, except: [:show]
   end

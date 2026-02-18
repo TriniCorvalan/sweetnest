@@ -9,6 +9,7 @@
       <div class="flex gap-3 items-center">
         <%= link_to "Pedidos", admin_orders_path, class: "bg-white/20 text-white px-4 py-2 rounded-xl border border-white/30 hover:bg-white/30" %>
         <%= link_to "Nuevo dulce", new_admin_candy_path, class: "bg-gradient-to-r from-emerald-400 to-teal-500 text-white px-4 py-2 rounded-xl font-bold shadow-glow hover:shadow-2xl btn-glow" %>
+        <%= render "admin/shared/logout_link" %>
       </div>
     </div>
 

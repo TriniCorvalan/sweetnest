@@ -5,7 +5,10 @@
         <h1 class="text-3xl font-bold">Nuevo dulce</h1>
         <p class="text-white/70">Agrega un candy con stock y restricciones</p>
       </div>
-      <%= link_to "← Volver", admin_candies_path, class: "text-white/90 underline hover:text-white" %>
+      <div class="flex items-center gap-3">
+        <%= link_to "← Volver", admin_candies_path, class: "text-white/90 underline hover:text-white" %>
+        <%= render "admin/shared/logout_link" %>
+      </div>
     </div>
 
     <%= render "form" %>

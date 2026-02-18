@@ -5,7 +5,10 @@
         <h1 class="text-3xl font-bold text-white">Pedido <%= @order.order_number %></h1>
         <p class="text-white/70">Creado <%= @order.created_at.strftime("%Y-%m-%d %H:%M") %></p>
       </div>
-      <%= link_to "← Volver al listado", admin_orders_path, class: "text-white/90 underline hover:text-white" %>
+      <div class="flex items-center gap-3">
+        <%= link_to "← Volver al listado", admin_orders_path, class: "text-white/90 underline hover:text-white" %>
+        <%= render "admin/shared/logout_link" %>
+      </div>
     </div>
 
     <% if flash[:notice].present? %>
