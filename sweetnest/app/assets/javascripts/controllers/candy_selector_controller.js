@@ -93,7 +93,7 @@
       wrapper.innerHTML =
         '<h3 class="text-xl font-bold text-white mb-4 flex items-center">' +
           '<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center mr-3 text-lg font-black">' + (i + 1) + "</div>" +
-          "Level " + (i + 1) + " (" + (sizeKey.charAt(0).toUpperCase() + sizeKey.slice(1)) + " candies)" +
+          "Nivel " + (i + 1) + " (" + (sizeKey.charAt(0).toUpperCase() + sizeKey.slice(1)) + " dulces)" +
         "</h3>" +
         '<div class="grid grid-cols-2 md:grid-cols-4 gap-3" data-level="' + i + '">' +
           [0,1,2,3].map(function (wall) {
@@ -101,9 +101,9 @@
               '<div class="wall-selector p-4 rounded-xl bg-white/10 border-2 border-dashed border-white/30 hover:border-white/60 transition-all">' +
                 '<div class="text-center mb-3">' +
                   '<div class="w-12 h-12 mx-auto mb-2 rounded-full bg-white/20 flex items-center justify-center text-xl">' +
-                    ["Front", "Right", "Back", "Left"][wall] + "📦" +
+                    ["Frente", "Derecha", "Atras", "Izquierda"][wall] + "📦" +
                   "</div>" +
-                  '<span class="text-white/70 text-sm block">Wall ' + (wall + 1) + "</span>" +
+                  '<span class="text-white/70 text-sm block">Pared ' + (wall + 1) + "</span>" +
                 "</div>" +
                 '<div class="candy-grid" data-wall="' + wall + '">' +
                   candies.map(function (candy) {

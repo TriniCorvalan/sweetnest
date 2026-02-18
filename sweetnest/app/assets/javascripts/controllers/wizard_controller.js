@@ -34,7 +34,7 @@
     var progressFill = document.getElementById("progressFill");
     if (progressFill) progressFill.style.width = String(step * 25) + "%";
 
-    var labels = ["Select Levels", "Choose Candies", "Review Cart", "Shipping"];
+    var labels = ["Seleccionar niveles", "Elegir dulces", "Revisar carrito", "Envio"];
     var labelEl = document.getElementById("stepLabel");
     if (labelEl) labelEl.textContent = labels[step - 1] || "";
 

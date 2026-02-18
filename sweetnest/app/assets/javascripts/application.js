@@ -81,7 +81,7 @@
     var progressFill = document.getElementById("progressFill");
     if (progressFill) progressFill.style.width = String(step * 25) + "%";
 
-    var labels = ["Select Levels", "Choose Candies", "Review Cart", "Shipping"];
+    var labels = ["Seleccionar niveles", "Elegir dulces", "Revisar carrito", "Envio"];
     var labelEl = document.getElementById("stepLabel");
     if (labelEl) labelEl.textContent = labels[step - 1] || "";
   }
@@ -117,6 +117,15 @@
       };
       var target = event.target.closest("#backToLevels, #nextToCart, #backToCandy, #nextToShipping, #backToCart");
       if (!target) return;
+
+      if (target.id === "nextToCart" && window.Sweetnest && !window.Sweetnest.hasSelectedCandies()) {
+        window.alert("Selecciona al menos 1 dulce antes de continuar.");
+        if (typeof window.Sweetnest.dispatch === "function") {
+          window.Sweetnest.dispatch("sweetnest:goToStep", { step: 2 });
+        }
+        applyStepUI(2);
+        return;
+      }
 
       var step = stepMap[target.id];
       if (!step) return;

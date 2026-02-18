@@ -48,6 +48,11 @@
 
   OrderController.prototype.onNextToCart = function (event) {
     if (event) event.preventDefault();
+    if (!window.Sweetnest.hasSelectedCandies()) {
+      window.alert("Selecciona al menos 1 dulce antes de continuar.");
+      window.Sweetnest.dispatch("sweetnest:goToStep", { step: 2 });
+      return;
+    }
     window.Sweetnest.computeCart();
     window.Sweetnest.dispatch("sweetnest:goToStep", { step: 3 });
   };

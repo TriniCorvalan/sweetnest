@@ -70,9 +70,9 @@
       '<div class="glass-effect p-6 rounded-2xl mb-6">' +
         '<h3 class="text-xl font-bold text-white mb-4 flex items-center">' +
           '<span class="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-xl flex items-center justify-center mr-3 text-lg font-black text-gray-900">1</span>' +
-          "Premium Nested Gift Box" +
+          "SweetNest premium" +
         "</h3>" +
-        '<div class="text-white/70 mb-3">Customizable nested box</div>' +
+        '<div class="text-white/70 mb-3">SweetNest personalizable</div>' +
         '<div class="text-2xl font-bold text-yellow-400">$' + Number(state.basePrice || 0).toFixed(2) + "</div>" +
       "</div>" +
       itemsHtml;

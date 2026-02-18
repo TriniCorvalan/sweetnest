@@ -48,6 +48,24 @@
     state.total = total;
   };
 
+  window.Sweetnest.selectedCandiesCount = function selectedCandiesCount() {
+    var state = window.Sweetnest.state;
+    var total = 0;
+
+    Object.keys(state.boxConfig || {}).forEach(function (levelKey) {
+      var walls = state.boxConfig[levelKey] || [];
+      walls.forEach(function (candies) {
+        total += (candies || []).length;
+      });
+    });
+
+    return total;
+  };
+
+  window.Sweetnest.hasSelectedCandies = function hasSelectedCandies() {
+    return window.Sweetnest.selectedCandiesCount() > 0;
+  };
+
   // Transforma a box_config para el backend:
   // { "0": { "0": [{candy_id, quantity}], ... }, "1": { ... } }
   window.Sweetnest.serializeBoxConfig = function serializeBoxConfig() {
