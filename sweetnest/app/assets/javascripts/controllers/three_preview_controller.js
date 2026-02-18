@@ -49,8 +49,9 @@
     var wallNames = this.wallNames();
     var html = "";
 
-    html += '<div class="w-full h-full overflow-auto p-4">';
-    html += '<div class="space-y-4 min-w-[560px]">';
+    // Sin scroll interno: que el contenido crezca y el scroll lo maneje la página.
+    html += '<div class="w-full p-4">';
+    html += '<div class="space-y-4">';
 
     for (var i = 0; i < levels; i++) {
       html += '<div class="rounded-2xl border border-white/10 bg-white/5 p-4">';
@@ -58,7 +59,7 @@
       html += '<div class="text-white font-bold">Nivel ' + String(i + 1) + "</div>";
       html += "</div>";
 
-      html += '<div class="grid grid-cols-4 gap-3">';
+      html += '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
       for (var w = 0; w < 4; w++) {
         var candies = (state.boxConfig && state.boxConfig[i] && state.boxConfig[i][w]) ? state.boxConfig[i][w] : [];
         html += '<div class="rounded-xl border border-white/10 bg-white/5 p-3">';
