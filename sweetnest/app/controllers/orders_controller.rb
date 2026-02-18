@@ -84,12 +84,22 @@ class OrdersController < ApplicationController
       )
     end
 
+    send_transfer_email(order)
+
     render json: { order_id: order.id, order_number: order.order_number }, status: :created
   rescue ActiveRecord::RecordInvalid => e
     render json: { error: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
   end
 
   private
+
+  def send_transfer_email(order)
+    return if order.blank? || order.address.blank? || order.address.email.blank?
+
+    OrderMailer.transfer_instructions(order).deliver_now
+  rescue StandardError => e
+    Rails.logger.error("No se pudo enviar correo de transferencia para order #{order&.id}: #{e.class} - #{e.message}")
+  end
 
   def generate_unique_order_number
     loop do

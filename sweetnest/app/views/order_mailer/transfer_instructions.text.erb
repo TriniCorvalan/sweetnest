@@ -1,0 +1,16 @@
+Hola <%= @address.full_name %>,
+
+Tu pedido <%= @order.order_number %> fue registrado correctamente.
+
+Para concretarlo, realiza la transferencia con los siguientes datos:
+- Banco: <%= @transfer_data[:bank_name] %>
+- Nombre cuenta: <%= @transfer_data[:account_name] %>
+- Tipo de cuenta: <%= @transfer_data[:account_type] %>
+- Numero de cuenta: <%= @transfer_data[:account_number] %>
+- RUT: <%= @transfer_data[:rut] %>
+- Email: <%= @transfer_data[:email] %>
+
+Importante: esta orden tiene vigencia de <%= @expiration_hours %> horas desde su creacion.
+Si la transferencia no se registra dentro de ese plazo, la orden sera cancelada automaticamente.
+
+Gracias por preferir SweetNest.
