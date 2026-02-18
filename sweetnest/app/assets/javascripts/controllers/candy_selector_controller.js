@@ -153,8 +153,10 @@
                     var plusDisabled = outOfStock || (Number(usedUnits) + Number(weightUnits) > Number(capUnits));
                     return (
                       '<div class="' + optClass + '" data-candy-id="' + candy.id + '" data-disabled="' + (outOfStock ? "true" : "false") + '">' +
-                        '<div class="w-12 h-12 mx-auto rounded-full shadow-lg flex items-center justify-center text-xl mb-1" style="background: linear-gradient(135deg, ' + candy.color_hex + ", " + candy.color_hex + 'cc);">' +
-                          candy.emoji +
+                        '<div class="w-12 h-12 mx-auto rounded-full shadow-lg flex items-center justify-center text-xl mb-1 overflow-hidden" style="background: linear-gradient(135deg, ' + candy.color_hex + ", " + candy.color_hex + 'cc);">' +
+                          (candy.image_url
+                            ? '<img src="' + candy.image_url + '" alt="' + (candy.name || "Dulce") + '" class="w-10 h-10 object-contain" />'
+                            : '<span>' + (candy.emoji || "🍬") + "</span>") +
                         "</div>" +
                         '<div class="text-center text-xs">' +
                           '<div class="font-bold text-white">' + candy.name + "</div>" +

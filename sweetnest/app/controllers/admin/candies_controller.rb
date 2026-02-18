@@ -51,6 +51,7 @@ module Admin
         :price,
         :size_category,
         :emoji,
+        :image_url,
         :color_hex,
         :preview_size,
         :stock,

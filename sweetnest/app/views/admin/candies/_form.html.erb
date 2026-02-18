@@ -16,9 +16,15 @@
       <%= f.text_field :name, required: true, class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
     </div>
     <div>
-      <%= f.label :emoji, "Emoji", class: "block text-white/90 mb-1" %>
-      <%= f.text_field :emoji, required: true, class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
+      <%= f.label :emoji, "Emoji (opcional si hay imagen)", class: "block text-white/90 mb-1" %>
+      <%= f.text_field :emoji, required: false, class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
     </div>
+  </div>
+
+  <div>
+    <%= f.label :image_url, "Imagen (URL o path)", class: "block text-white/90 mb-1" %>
+    <%= f.text_field :image_url, required: false, placeholder: "https://... o /assets/candies/...", class: "w-full rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30" %>
+    <div class="text-white/60 text-xs mt-1">Se usará esta imagen en vez del emoji si está presente.</div>
   </div>
 
   <div class="grid md:grid-cols-3 gap-4">

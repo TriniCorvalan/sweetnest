@@ -39,7 +39,11 @@
               <td class="py-3 pr-4">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg" style="background: linear-gradient(135deg, <%= candy.color_hex %>, <%= candy.color_hex %>cc);">
-                    <%= candy.emoji %>
+                    <% if candy.image_url.present? %>
+                      <img src="<%= candy.image_url %>" alt="<%= candy.name %>" class="w-8 h-8 object-contain" />
+                    <% else %>
+                      <%= candy.emoji.presence || "🍬" %>
+                    <% end %>
                   </div>
                   <div>
                     <div class="font-semibold"><%= candy.name %></div>

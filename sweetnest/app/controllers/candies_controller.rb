@@ -12,6 +12,7 @@ class CandiesController < ApplicationController
           price: c.price.to_f,
           size_category: c.size_category,
           emoji: c.emoji,
+          image_url: c.image_url,
           color_hex: c.color_hex,
           preview_size: c.preview_size.to_f,
           allowed_levels: (c.allowed_levels || []).map(&:to_i),

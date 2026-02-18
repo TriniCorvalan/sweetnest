@@ -105,9 +105,13 @@
           var overflow = Math.max(0, candies.length - shown.length);
           html += '<div class="flex flex-wrap gap-2 items-center">';
           for (var c = 0; c < shown.length; c++) {
-            var emoji = shown[c] && shown[c].emoji ? String(shown[c].emoji) : "🍬";
+            var item = shown[c] || {};
+            var emoji = item.emoji ? String(item.emoji) : "🍬";
+            var img = item.image_url ? String(item.image_url) : null;
             html += '<span class="relative w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-lg">';
-            html += emoji;
+            html += img
+              ? '<img src="' + img + '" alt="' + (item.name ? String(item.name) : "Dulce") + '" class="w-7 h-7 object-contain" />'
+              : emoji;
             html += '<button type="button" title="Quitar 1" data-preview-remove-one data-level="' + String(i) + '" data-wall="' + String(w) + '" data-candy-index="' + String(c) + '" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-rose-500/80 text-white text-[10px] leading-[20px] border border-white/20 hover:bg-rose-500">✕</button>';
             html += "</span>";
           }
