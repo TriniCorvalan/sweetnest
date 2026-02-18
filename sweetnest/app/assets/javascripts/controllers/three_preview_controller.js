@@ -91,8 +91,11 @@
       html += '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
       for (var w = 0; w < 4; w++) {
         var candies = (state.boxConfig && state.boxConfig[i] && state.boxConfig[i][w]) ? state.boxConfig[i][w] : [];
+        var capUnits = window.Sweetnest.wallCapacityUnits ? window.Sweetnest.wallCapacityUnits(i) : 4;
+        var usedUnits = window.Sweetnest.wallLoadUnits ? window.Sweetnest.wallLoadUnits(i, w) : (candies || []).length;
         html += '<div class="rounded-xl border border-white/10 bg-white/5 p-3">';
-        html += '<div class="text-xs text-white/70 font-bold mb-2">' + wallNames[w] + "</div>";
+        html += '<div class="text-xs text-white/70 font-bold">' + wallNames[w] + "</div>";
+        html += '<div class="text-white/40 text-[10px] mb-2">Espacios: ' + String(usedUnits) + "/" + String(capUnits) + " 🍬</div>";
 
         if (!candies || !candies.length) {
           html += '<div class="text-white/40 text-xs">Sin dulces</div>';

@@ -112,7 +112,10 @@
         }
         var load = window.Sweetnest.wallLoadUnits(i, w);
         if (load > cap) {
-          errors.push("Excede capacidad en Nivel " + String(i + 1) + " - " + (WALL_NAMES[w] || ("Pared " + String(w + 1))));
+          errors.push(
+            "Excede capacidad en Nivel " + String(i + 1) + " - " + (WALL_NAMES[w] || ("Pared " + String(w + 1))) +
+            " (usado " + String(load) + "/" + String(cap) + " 🍬)"
+          );
         }
       }
     }
