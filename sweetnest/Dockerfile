@@ -1,12 +1,13 @@
-FROM ruby:2.6.10-buster
+FROM ruby:2.6.10-bullseye
 
 ENV LANG=C.UTF-8 \
   BUNDLE_JOBS=4 \
   BUNDLE_RETRY=3
 
-RUN apt-get update -qq && \
+RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   build-essential \
+  bash \
   libpq-dev \
   curl \
   ca-certificates \
@@ -25,6 +26,6 @@ RUN chmod +x ./docker/entrypoint.sh
 
 EXPOSE 3000
 
-ENTRYPOINT ["./docker/entrypoint.sh"]
+ENTRYPOINT ["bash", "./docker/entrypoint.sh"]
 CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
 

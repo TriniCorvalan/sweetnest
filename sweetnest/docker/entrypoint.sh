@@ -16,10 +16,17 @@ if [ "${RAILS_ENV:-development}" != "production" ]; then
 
   # Migraciones + seeds (idempotente)
   echo "==> Ejecutando migraciones"
-  bundle exec rails db:migrate
+  if ! bundle exec rails db:migrate; then
+    exit 1
+  fi
   echo "==> Cargando seeds"
   bundle exec rails db:seed
 fi
 
+# Limpiar PID viejo (común si tmp/ está montado desde host)
+mkdir -p tmp/pids
+if [ -f tmp/pids/server.pid ]; then
+  rm -f tmp/pids/server.pid
+fi
 exec "$@"
 
