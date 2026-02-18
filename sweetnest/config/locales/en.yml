@@ -31,3 +31,14 @@
 
 en:
   hello: "Hello world"
+  admin:
+    orders:
+      statuses:
+        created: "Creado"
+        in_progress: "En preparación"
+        shipped: "Enviado"
+        delivered: "Entregado"
+        cancelled: "Cancelado"
+      messages:
+        invalid_status: "Estado inválido."
+        status_updated: "Estado actualizado a %{status}."

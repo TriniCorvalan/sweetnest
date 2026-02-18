@@ -18,7 +18,7 @@
     <div class="grid md:grid-cols-2 gap-4 text-white">
       <div class="bg-white/10 rounded-2xl p-4 border border-white/20">
         <div class="text-white/70 text-sm">Estado actual</div>
-        <div class="text-xl font-semibold"><%= @order.status %></div>
+        <div class="text-xl font-semibold"><%= translated_order_status(@order.status) %></div>
       </div>
       <div class="bg-white/10 rounded-2xl p-4 border border-white/20">
         <div class="text-white/70 text-sm">Total estimado</div>
@@ -31,7 +31,7 @@
         <label for="status" class="text-white/90">Cambiar estado</label>
         <select id="status" name="status" class="rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30">
           <% available_statuses.each do |status| %>
-            <option value="<%= status %>" <%= "selected" if status == @order.status %>><%= status %></option>
+            <option value="<%= status %>" <%= "selected" if status == @order.status %>><%= translated_order_status(status) %></option>
           <% end %>
         </select>
         <button type="submit" class="bg-emerald-500/80 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl">Guardar estado</button>
@@ -44,7 +44,7 @@
     <% if @address.present? %>
       <div><strong>Nombre:</strong> <%= @address.full_name %></div>
       <div><strong>Direccion:</strong> <%= @address.street %> <%= @address.unit.presence || "" %></div>
-      <div><strong>Ciudad:</strong> <%= @address.city %></div>
+      <div><strong>Comuna/Region:</strong> <%= @address.city %></div>
       <div><strong>Codigo postal:</strong> <%= @address.zip %></div>
       <div><strong>Instrucciones:</strong> <%= @address.special_instructions.presence || "-" %></div>
     <% else %>

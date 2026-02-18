@@ -5,7 +5,7 @@ module Admin
     before_action :authenticate_admin!
     before_action :set_order, only: [:show, :update]
 
-    helper_method :available_statuses, :order_total
+    helper_method :available_statuses, :order_total, :translated_order_status
 
     def index
       @status_filter = params[:status].presence
@@ -22,12 +22,15 @@ module Admin
     def update
       next_status = params[:status].to_s
       unless available_statuses.include?(next_status)
-        redirect_to admin_order_path(@order), alert: "Estado invalido."
+        redirect_to admin_order_path(@order), alert: I18n.t("admin.orders.messages.invalid_status")
         return
       end
 
       @order.update!(status: next_status)
-      redirect_to admin_order_path(@order), notice: "Estado actualizado a #{next_status}."
+      redirect_to admin_order_path(@order), notice: I18n.t(
+        "admin.orders.messages.status_updated",
+        status: translated_order_status(next_status)
+      )
     rescue ActiveRecord::RecordInvalid => e
       redirect_to admin_order_path(@order), alert: e.record.errors.full_messages.to_sentence
     end
@@ -69,6 +72,10 @@ module Admin
 
     def available_statuses
       @available_statuses ||= (DEFAULT_STATUSES + Order.distinct.pluck(:status)).compact.uniq
+    end
+
+    def translated_order_status(status)
+      I18n.t("admin.orders.statuses.#{status}", default: status.to_s.humanize)
     end
 
     def order_total(order)

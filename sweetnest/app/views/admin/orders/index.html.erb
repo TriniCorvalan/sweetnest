@@ -11,7 +11,7 @@
         <select id="status" name="status" class="rounded-xl px-3 py-2 bg-white/20 text-white border border-white/30">
           <option value="">Todos</option>
           <% available_statuses.each do |status| %>
-            <option value="<%= status %>" <%= "selected" if status == @status_filter %>><%= status %></option>
+            <option value="<%= status %>" <%= "selected" if status == @status_filter %>><%= translated_order_status(status) %></option>
           <% end %>
         </select>
         <button type="submit" class="bg-white/20 text-white px-4 py-2 rounded-xl border border-white/30 hover:bg-white/30">Aplicar</button>
@@ -43,7 +43,7 @@
               <td class="py-3 pr-4 font-semibold"><%= order.order_number %></td>
               <td class="py-3 pr-4"><%= order.created_at.strftime("%Y-%m-%d %H:%M") %></td>
               <td class="py-3 pr-4">
-                <span class="px-2 py-1 rounded-lg bg-white/20 border border-white/20"><%= order.status %></span>
+                <span class="px-2 py-1 rounded-lg bg-white/20 border border-white/20"><%= translated_order_status(order.status) %></span>
               </td>
               <td class="py-3 pr-4"><%= order.address&.full_name || "-" %></td>
               <td class="py-3 pr-4">$<%= format("%.2f", order_total(order)) %></td>
