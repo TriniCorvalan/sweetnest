@@ -48,8 +48,9 @@
 
   OrderController.prototype.onNextToCart = function (event) {
     if (event) event.preventDefault();
-    if (!window.Sweetnest.hasSelectedCandies()) {
-      window.alert("Selecciona al menos 1 dulce antes de continuar.");
+    var errors = window.Sweetnest.boxValidationErrors ? window.Sweetnest.boxValidationErrors() : [];
+    if (errors && errors.length > 0) {
+      window.alert(errors.join("\n"));
       window.Sweetnest.dispatch("sweetnest:goToStep", { step: 2 });
       return;
     }
@@ -81,6 +82,13 @@
 
     if (!form.checkValidity()) {
       form.reportValidity();
+      return;
+    }
+
+    var boxErrors = window.Sweetnest.boxValidationErrors ? window.Sweetnest.boxValidationErrors() : [];
+    if (boxErrors && boxErrors.length > 0) {
+      window.alert(boxErrors.join("\n"));
+      window.Sweetnest.dispatch("sweetnest:goToStep", { step: 2 });
       return;
     }
 

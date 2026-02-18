@@ -1,6 +1,11 @@
 // Shared global state (simple, framework-free).
 (function () {
   var BASE_PRICE = 29.99;
+  var WALL_NAMES = ["Frente", "Derecha", "Atras", "Izquierda"];
+  // Capacidad por pared por nivel (1..3), expresada en "unidades small".
+  // La capacidad efectiva se calcula ponderando por tamaño del dulce.
+  var LEVEL_WALL_CAPACITY_UNITS = [4, 6, 8];
+  var SIZE_WEIGHTS = { small: 1, medium: 2, large: 3 };
 
   function initialState() {
     return {
@@ -64,6 +69,55 @@
 
   window.Sweetnest.hasSelectedCandies = function hasSelectedCandies() {
     return window.Sweetnest.selectedCandiesCount() > 0;
+  };
+
+  window.Sweetnest.wallCapacityUnits = function wallCapacityUnits(levelIndex) {
+    var idx = Math.min(Number(levelIndex) || 0, 2);
+    return LEVEL_WALL_CAPACITY_UNITS[idx];
+  };
+
+  window.Sweetnest.candyWeightUnits = function candyWeightUnits(candy) {
+    var key = candy && candy.size_category ? String(candy.size_category) : "small";
+    return SIZE_WEIGHTS[key] || 1;
+  };
+
+  window.Sweetnest.wallLoadUnits = function wallLoadUnits(levelIndex, wallIndex) {
+    var state = window.Sweetnest.state;
+    var candies = (state.boxConfig && state.boxConfig[levelIndex] && state.boxConfig[levelIndex][wallIndex]) ? state.boxConfig[levelIndex][wallIndex] : [];
+    var total = 0;
+    (candies || []).forEach(function (c) {
+      total += window.Sweetnest.candyWeightUnits(c);
+    });
+    return total;
+  };
+
+  // Valida reglas de armado:
+  // - Cada pared de cada nivel debe tener al menos 1 dulce
+  // - No exceder la capacidad por pared, ponderada por tamaño
+  // Devuelve un arreglo de strings (errores).
+  window.Sweetnest.boxValidationErrors = function boxValidationErrors() {
+    var state = window.Sweetnest.state;
+    var levels = Number(state && state.levels) || 0;
+    var errors = [];
+    if (!levels) return ["Selecciona la cantidad de niveles antes de continuar."];
+
+    for (var i = 0; i < levels; i++) {
+      var cap = window.Sweetnest.wallCapacityUnits(i);
+      for (var w = 0; w < 4; w++) {
+        var candies = (state.boxConfig && state.boxConfig[i] && state.boxConfig[i][w]) ? state.boxConfig[i][w] : [];
+        var count = (candies || []).length;
+        if (count <= 0) {
+          errors.push("Falta seleccionar 1 dulce en Nivel " + String(i + 1) + " - " + (WALL_NAMES[w] || ("Pared " + String(w + 1))));
+          continue;
+        }
+        var load = window.Sweetnest.wallLoadUnits(i, w);
+        if (load > cap) {
+          errors.push("Excede capacidad en Nivel " + String(i + 1) + " - " + (WALL_NAMES[w] || ("Pared " + String(w + 1))));
+        }
+      }
+    }
+
+    return errors;
   };
 
   // Transforma a box_config para el backend:

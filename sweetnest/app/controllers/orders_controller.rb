@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class OrdersController < ApplicationController
+  WALL_CAPACITY_UNITS = [4, 6, 8].freeze
+  SIZE_WEIGHT_UNITS = { "small" => 1, "medium" => 2, "large" => 3 }.freeze
+
   def create
     payload = request.request_parameters || {}
 
@@ -25,6 +28,7 @@ class OrdersController < ApplicationController
     order = nil
     requested_entries = []
     requested_totals = Hash.new(0)
+    requested_by_wall = Hash.new { |h, k| h[k] = { qty: 0, units: 0 } }
 
     # Normaliza box_config a una lista de {level_index, wall_position, candy_id, quantity}
     box_config.each do |level_key, walls|
@@ -55,6 +59,23 @@ class OrdersController < ApplicationController
     end
 
     ActiveRecord::Base.transaction do
+      # Reglas de armado: cada pared con al menos 1 dulce y capacidad por pared.
+      required_pairs = []
+      (0...levels).each do |level_index|
+        (0..3).each do |wall_position|
+          required_pairs << [level_index, wall_position]
+        end
+      end
+
+      required_pairs.each do |(level_index, wall_position)|
+        has_any = requested_entries.any? { |e| e[:level_index] == level_index && e[:wall_position] == wall_position }
+        unless has_any
+          invalid = Order.new
+          invalid.errors.add(:base, "Cada pared de cada nivel debe tener al menos 1 dulce (falta Nivel #{level_index + 1}, pared #{wall_position + 1})")
+          raise ActiveRecord::RecordInvalid, invalid
+        end
+      end
+
       # Bloqueo de stock y validaciones (evita sobreventa y pedidos inválidos si se manipula el payload).
       if requested_entries.any?
         candies_by_id = Candy.lock.where(id: requested_totals.keys).index_by(&:id)
@@ -68,7 +89,6 @@ class OrdersController < ApplicationController
         requested_entries.each do |entry|
           candy = candies_by_id[entry[:candy_id]]
           level_number = entry[:level_index] + 1
-          expected_size = %w[small medium large][[entry[:level_index], 2].min]
 
           unless candy.allowed_on_level?(level_number)
             invalid = Order.new
@@ -76,9 +96,24 @@ class OrdersController < ApplicationController
             raise ActiveRecord::RecordInvalid, invalid
           end
 
-          if candy.size_category != expected_size
+          weight = SIZE_WEIGHT_UNITS[candy.size_category.to_s] || 1
+          max_weight = [1, 2, 3][[entry[:level_index].to_i, 2].min]
+          if weight > max_weight
             invalid = Order.new
-            invalid.errors.add(:base, "El dulce '#{candy.name}' no corresponde al nivel #{level_number}")
+            invalid.errors.add(:base, "El dulce '#{candy.name}' es demasiado grande para el nivel #{level_number}")
+            raise ActiveRecord::RecordInvalid, invalid
+          end
+
+          key = [entry[:level_index], entry[:wall_position]]
+          requested_by_wall[key][:qty] += entry[:quantity].to_i
+          requested_by_wall[key][:units] += entry[:quantity].to_i * weight
+        end
+
+        requested_by_wall.each do |(level_index, wall_position), stats|
+          cap = WALL_CAPACITY_UNITS[[level_index.to_i, 2].min] || WALL_CAPACITY_UNITS[0]
+          if stats[:units].to_i > cap.to_i
+            invalid = Order.new
+            invalid.errors.add(:base, "Excede capacidad en Nivel #{level_index + 1}, pared #{wall_position + 1}")
             raise ActiveRecord::RecordInvalid, invalid
           end
         end

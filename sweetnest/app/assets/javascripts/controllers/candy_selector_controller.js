@@ -77,6 +77,22 @@
     return ["small", "medium", "large"][Math.min(levelIndex, 2)];
   };
 
+  CandySelectorController.prototype.sizeKeysAllowedForLevel = function (levelIndex) {
+    // Restricción inversa: en niveles grandes se permiten dulces más pequeños.
+    // Nivel 1: small; Nivel 2: small+medium; Nivel 3: small+medium+large
+    var idx = Math.min(Number(levelIndex) || 0, 2);
+    if (idx === 0) return ["small"];
+    if (idx === 1) return ["small", "medium"];
+    return ["small", "medium", "large"];
+  };
+
+  CandySelectorController.prototype.levelSizeLabel = function (levelIndex) {
+    var keys = this.sizeKeysAllowedForLevel(levelIndex);
+    if (keys.length === 1) return "Pequeños";
+    if (keys.length === 2) return "Pequeños y medianos";
+    return "Pequeños, medianos y grandes";
+  };
+
   CandySelectorController.prototype.renderLevelSelector = function () {
     var container = document.getElementById("levelSelector");
     if (!container) return;
@@ -86,8 +102,12 @@
 
     for (var i = 0; i < state.levels; i++) {
       var levelNumber = i + 1;
-      var sizeKey = this.sizeKeyForLevel(i);
-      var candies = (this.candiesBySize && this.candiesBySize[sizeKey]) || [];
+      var allowedKeys = this.sizeKeysAllowedForLevel(i);
+      var candies = [];
+      for (var k = 0; k < allowedKeys.length; k++) {
+        var key = allowedKeys[k];
+        candies = candies.concat(((this.candiesBySize && this.candiesBySize[key]) || []));
+      }
       // Restricción opcional por nivel: si allowed_levels viene vacío, se permite en todos.
       candies = candies.filter(function (c) {
         var allowed = (c && c.allowed_levels) || [];
@@ -100,7 +120,7 @@
       wrapper.innerHTML =
         '<h3 class="text-xl font-bold text-white mb-4 flex items-center">' +
           '<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center mr-3 text-lg font-black">' + (i + 1) + "</div>" +
-          "Nivel " + (i + 1) + " (" + (sizeKey.charAt(0).toUpperCase() + sizeKey.slice(1)) + " dulces)" +
+          "Nivel " + (i + 1) + " (" + this.levelSizeLabel(i) + ")" +
         "</h3>" +
         '<div class="grid grid-cols-2 md:grid-cols-4 gap-3" data-level="' + i + '">' +
           [0,1,2,3].map(function (wall) {
@@ -163,8 +183,12 @@
     if (!state.boxConfig[level]) state.boxConfig[level] = [[], [], [], []];
     if (!state.boxConfig[level][wall]) state.boxConfig[level][wall] = [];
 
-    var sizeKey = this.sizeKeyForLevel(level);
-    var candies = (this.candiesBySize && this.candiesBySize[sizeKey]) || [];
+    var allowedKeys = this.sizeKeysAllowedForLevel(level);
+    var candies = [];
+    for (var k = 0; k < allowedKeys.length; k++) {
+      var key = allowedKeys[k];
+      candies = candies.concat(((this.candiesBySize && this.candiesBySize[key]) || []));
+    }
     var candy = candies.find(function (c) { return Number(c.id) === candyId; });
     if (!candy) return;
     // Si el backend mandó allowed_levels, respétalo también en el click.
@@ -172,8 +196,15 @@
     if (allowed && allowed.length > 0 && allowed.map(Number).indexOf(level + 1) === -1) return;
     if (Number((candy && candy.stock) || 0) <= 0) return;
 
+    var nextWeight = window.Sweetnest.candyWeightUnits ? window.Sweetnest.candyWeightUnits(candy) : 1;
+    var cap = window.Sweetnest.wallCapacityUnits ? window.Sweetnest.wallCapacityUnits(level) : 5;
+    var load = window.Sweetnest.wallLoadUnits ? window.Sweetnest.wallLoadUnits(level, wall) : state.boxConfig[level][wall].length;
+    if (load + nextWeight > cap) {
+      window.alert("Esta pared ya alcanzó el máximo para este nivel.");
+      return;
+    }
+
     state.boxConfig[level][wall].push(candy);
-    if (state.boxConfig[level][wall].length > 5) state.boxConfig[level][wall].shift();
 
     window.Sweetnest.computeCart();
     window.Sweetnest.dispatch("sweetnest:configChanged", { level: level, wall: wall });
