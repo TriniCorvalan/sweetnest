@@ -24,6 +24,9 @@ COPY . .
 
 RUN chmod +x ./docker/entrypoint.sh
 
+# Precompilar assets para producción (evita 500 por assets faltantes)
+RUN RAILS_ENV=production SECRET_KEY_BASE=precompile-dummy bundle exec rails assets:precompile
+
 EXPOSE 3000
 
 ENTRYPOINT ["bash", "./docker/entrypoint.sh"]

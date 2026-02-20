@@ -19,6 +19,10 @@ services:
     envVars:
       - key: RAILS_ENV
         value: production
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
       - key: SECRET_KEY_BASE
         sync: false
       - key: DATABASE_URL
