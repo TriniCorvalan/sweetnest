@@ -3,26 +3,39 @@ set -euo pipefail
 
 echo "==> SweetNest: preparando contenedor"
 
-# En Render solo se inyecta DATABASE_URL; extraer host y puerto para la espera
+# Esperar a Postgres
 if [ -n "${DATABASE_URL:-}" ]; then
-  export DATABASE_HOST="${DATABASE_HOST:-$(ruby -r uri -e "puts URI.parse(ENV['DATABASE_URL']).host")}"
-  export DATABASE_PORT="${DATABASE_PORT:-$(ruby -r uri -e "u=URI.parse(ENV['DATABASE_URL']); puts u.port || 5432")}"
-fi
-
-# Esperar a Postgres (development y production)
-echo "==> Esperando Postgres en ${DATABASE_HOST:-db}:${DATABASE_PORT:-5432}..."
-pg_ok=
-for i in {1..60}; do
-  if ruby -r socket -e "TCPSocket.new(ENV.fetch('DATABASE_HOST','db'), Integer(ENV.fetch('DATABASE_PORT','5432'))).close" 2>/dev/null; then
-    echo "==> Postgres listo"
-    pg_ok=1
-    break
+  # Producción (Render): conexión real con Rails; Render no siempre acepta TCP crudo al puerto 5432
+  echo "==> Esperando Postgres (conexión vía DATABASE_URL)..."
+  pg_ok=
+  for i in {1..60}; do
+    if bundle exec rails runner "ActiveRecord::Base.connection.execute('SELECT 1')" 2>/dev/null; then
+      echo "==> Postgres listo"
+      pg_ok=1
+      break
+    fi
+    sleep 1
+  done
+  if [ -z "${pg_ok:-}" ]; then
+    echo "==> ERROR: No se pudo conectar a Postgres en 60s. Revisa DATABASE_URL."
+    exit 1
   fi
-  sleep 1
-done
-if [ -z "${pg_ok:-}" ]; then
-  echo "==> ERROR: No se pudo conectar a Postgres en 60s. Revisa DATABASE_URL / red."
-  exit 1
+else
+  # Development (docker-compose): espera por TCP a db:5432
+  echo "==> Esperando Postgres en ${DATABASE_HOST:-db}:${DATABASE_PORT:-5432}..."
+  pg_ok=
+  for i in {1..60}; do
+    if ruby -r socket -e "TCPSocket.new(ENV.fetch('DATABASE_HOST','db'), Integer(ENV.fetch('DATABASE_PORT','5432'))).close" 2>/dev/null; then
+      echo "==> Postgres listo"
+      pg_ok=1
+      break
+    fi
+    sleep 1
+  done
+  if [ -z "${pg_ok:-}" ]; then
+    echo "==> ERROR: No se pudo conectar a Postgres en 60s."
+    exit 1
+  fi
 fi
 
 # Migraciones en todos los entornos
