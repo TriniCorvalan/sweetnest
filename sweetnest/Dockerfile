@@ -27,5 +27,6 @@ RUN chmod +x ./docker/entrypoint.sh
 EXPOSE 3000
 
 ENTRYPOINT ["bash", "./docker/entrypoint.sh"]
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+# PORT lo inyecta Render en producción; en local docker-compose usa 3000 por defecto
+CMD ["sh", "-c", "bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"]
 

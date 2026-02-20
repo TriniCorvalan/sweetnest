@@ -1,0 +1,25 @@
+# Render Blueprint: SweetNest
+# Conecta este repo en Render y usa "New > Blueprint" para crear Postgres + Web Service.
+# Debes definir SECRET_KEY_BASE en el Dashboard (Environment) al crear el servicio.
+
+databases:
+  - name: sweetnest-db
+    plan: free
+    databaseName: sweetnest_production
+
+services:
+  - type: web
+    runtime: docker
+    name: sweetnest
+    rootDir: sweetnest
+    plan: free
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: SECRET_KEY_BASE
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sweetnest-db
+          property: connectionString
+    # Añade en el Dashboard si los usas: ADMIN_USERNAME, ADMIN_PASSWORD, TRANSFER_*, MAIL_FROM
