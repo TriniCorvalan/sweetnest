@@ -3,6 +3,13 @@ set -euo pipefail
 
 echo "==> SweetNest: preparando contenedor"
 
+# En Render el Blueprint inyecta la URL interna (host corto tipo dpg-xxx-a); en Docker ese host no resuelve.
+# Reescribir DATABASE_URL al hostname externo (dpg-xxx-a.REGION-postgres.render.com) para que resuelva por DNS público.
+if [ "${RAILS_ENV:-development}" = "production" ] && [ -n "${DATABASE_URL:-}" ]; then
+  DATABASE_URL="$(ruby -r uri -e 'u=URI.parse(ENV["DATABASE_URL"]); if u.host && !u.host.include?("."); r=ENV.fetch("RENDER_REGION","oregon"); u.host=u.host+"."+r+"-postgres.render.com"; end; puts u.to_s')"
+  export DATABASE_URL
+fi
+
 # Esperar a Postgres
 # En producción (Render) usamos conexión real con Rails; TCP al puerto 5432 suele fallar en Render
 if [ "${RAILS_ENV:-development}" = "production" ]; then
