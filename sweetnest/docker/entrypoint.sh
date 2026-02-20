@@ -4,9 +4,9 @@ set -euo pipefail
 echo "==> SweetNest: preparando contenedor"
 
 # Esperar a Postgres
-if [ -n "${DATABASE_URL:-}" ]; then
-  # Producción (Render): conexión real con Rails; Render no siempre acepta TCP crudo al puerto 5432
-  echo "==> Esperando Postgres (conexión vía DATABASE_URL)..."
+# En producción (Render) usamos conexión real con Rails; TCP al puerto 5432 suele fallar en Render
+if [ "${RAILS_ENV:-development}" = "production" ]; then
+  echo "==> Esperando Postgres (conexión vía Rails)..."
   pg_ok=
   for i in {1..60}; do
     if bundle exec rails runner "ActiveRecord::Base.connection.execute('SELECT 1')" 2>/dev/null; then
