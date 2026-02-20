@@ -52,10 +52,17 @@ if ! bundle exec rails db:migrate; then
   exit 1
 fi
 
-# Seeds solo en development (en production no se ejecutan para no sobrescribir datos)
+# Seeds: en development siempre; en production solo si no hay candies (primera vez / DB vacía)
 if [ "${RAILS_ENV:-development}" != "production" ]; then
   echo "==> Cargando seeds"
   bundle exec rails db:seed
+else
+  if bundle exec rails runner "exit(Candy.count.zero? ? 0 : 1)" 2>/dev/null; then
+    echo "==> No hay candies; cargando seeds (solo primera vez)"
+    bundle exec rails db:seed
+  else
+    echo "==> Candies ya existen; omitiendo seeds"
+  fi
 fi
 
 # Limpiar PID viejo (común si tmp/ está montado desde host)
