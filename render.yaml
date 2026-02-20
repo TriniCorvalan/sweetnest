@@ -6,7 +6,6 @@ databases:
   - name: sweetnest-db
     plan: free
     databaseName: sweetnest_production
-    region: virginia
     # region: oregon  # por defecto; si cambias región, pon RENDER_REGION en el Web Service
 
 services:
