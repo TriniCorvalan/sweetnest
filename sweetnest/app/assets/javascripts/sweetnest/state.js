@@ -34,7 +34,7 @@
   window.Sweetnest.computeCart = function computeCart() {
     var state = window.Sweetnest.state;
     var byId = {};
-    var total = state.basePrice;
+    var total = 0;
 
     Object.keys(state.boxConfig || {}).forEach(function (levelKey) {
       var walls = state.boxConfig[levelKey] || [];
@@ -50,6 +50,8 @@
     state.cart = Object.keys(byId).map(function (id) {
       return Object.assign({}, byId[id].candy, { quantity: byId[id].quantity });
     });
+    // Precio base de la caja solo si ya hay caramelos agregados
+    if (state.cart.length > 0) total += state.basePrice;
     state.total = total;
   };
 
