@@ -8,7 +8,7 @@ echo "==> SweetNest: preparando contenedor"
 if [ "${RAILS_ENV:-development}" = "production" ]; then
   echo "==> Esperando Postgres (conexión vía Rails)..."
   pg_ok=
-  for i in {1..60}; do
+  for i in {1..90}; do
     if bundle exec rails runner "ActiveRecord::Base.connection.execute('SELECT 1')" 2>/dev/null; then
       echo "==> Postgres listo"
       pg_ok=1
@@ -17,7 +17,8 @@ if [ "${RAILS_ENV:-development}" = "production" ]; then
     sleep 1
   done
   if [ -z "${pg_ok:-}" ]; then
-    echo "==> ERROR: No se pudo conectar a Postgres en 60s. Revisa DATABASE_URL."
+    echo "==> ERROR: No se pudo conectar a Postgres en 90s. Último error:"
+    bundle exec rails runner "ActiveRecord::Base.connection.execute('SELECT 1')" || true
     exit 1
   fi
 else
