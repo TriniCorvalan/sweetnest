@@ -6,6 +6,7 @@ databases:
   - name: sweetnest-db
     plan: free
     databaseName: sweetnest_production
+    region: virginia
     # region: oregon  # por defecto; si cambias región, pon RENDER_REGION en el Web Service
 
 services:
@@ -14,6 +15,7 @@ services:
     name: sweetnest
     rootDir: sweetnest
     plan: free
+    region: virginia
     # Misma región que la DB para que la URL externa resuelva (ej. oregon → .oregon-postgres.render.com)
     envVars:
       - key: RAILS_ENV
